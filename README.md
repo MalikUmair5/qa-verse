@@ -1,5 +1,8 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+# qa-verse
+QAVerse – A collaborative QA testing platform connecting student testers with project maintainers.  Features include bug reporting, project management, gamification (XP, badges, leaderboards), and  analytics. Built with Node.js, PostgreSQL, Redis, and cloud deployment (Docker + AWS/Heroku).
+
 ## Getting Started
 
 First, run the development server:
