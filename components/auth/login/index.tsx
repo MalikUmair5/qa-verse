@@ -5,6 +5,7 @@ import loginBGImage from "../../../public/loginBGImage.png"
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { aclonica } from '@/app/layout'
+import ThemeButton from '@/components/ui/button'
 
 function LoginPage() {
   return (
@@ -81,21 +82,7 @@ function LoginPage() {
               placeholder="Password"
               className="mt-4 p-2  mb-4 w-full bg-transparent border-b-2 active:border-amber-500 focus:border-amber-500 outline-none"
             />
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              // disabled={loading}
-              className={`w-full mb-4  text-[#216145] bg-white py-2 rounded-md font-medium transition`}
-            >
-              {/* {loading ? (
-                <div className="w-5 h-5 border-2 border-t-transparent bg-white border-[#216145] rounded-full animate-spin mx-auto"></div>
-              ) : (
-                "Login"
-              )} */}
-
-              Login
-            </motion.button>
+            <ThemeButton variant="primary" type="submit">Login</ThemeButton>
 
 
 
