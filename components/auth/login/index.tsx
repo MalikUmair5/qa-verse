@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { aclonica } from '@/app/layout'
 import ThemeButton from '@/components/ui/button'
+import Link from 'next/link'
 
 function LoginPage() {
   return (
@@ -85,10 +86,11 @@ function LoginPage() {
             <ThemeButton variant="primary" type="submit">Login</ThemeButton>
 
 
-
-            <button>
-              Don’t Have An Account? Signup
-            </button>
+            <Link href="/signup" className=" cursor-pointer">
+              <button>
+                Don’t Have An Account? Signup
+              </button>
+            </Link>
 
 
 
