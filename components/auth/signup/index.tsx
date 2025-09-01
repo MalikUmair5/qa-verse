@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import SignupForm from './SignupForm'
+import SignupForm from './SignUpForm'
 import Link from 'next/link'
 
 function SignUpPage() {
