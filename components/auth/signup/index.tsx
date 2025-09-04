@@ -5,50 +5,89 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import SignupForm from '@/components/auth/signup/signupForm'
 import Link from 'next/link'
+import { aclonica } from '@/app/layout'
 
 function SignUpPage() {
   const [tab, setTab] = useState<'tester' | 'owner'>('tester')
   console.log("I am clicked", tab)
 
   return (
-    <div className="flex flex-col min-h-screen md:flex-row">
-      {/* Left Side */}
-      <div className="flex justify-center items-center w-full md:w-1/2 p-6">
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Image src="/bug.png" alt="Bug" width={300} height={300} />
-        </motion.div>
+    <div className="min-h-screen flex flex-col md:flex-row overflow-hidden relative">
+      {/* Background Image - Same as Login */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0"></div>
+        <div className="absolute inset-0">
+          <img
+            src="/loginBGImage.png"
+            alt="Housing community"
+            className="w-full h-full object-cover"
+          />
+        </div>
       </div>
 
-      {/* Right Side */}
-      <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-6">
+      {/* Left Side - Welcome Section */}
+      <div className='flex flex-col items-center justify-center w-full md:w-1/2 p-6 md:p-16 z-10 relative text-white'>
+        <motion.h2
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+          className={`${aclonica.className} capitalize text-center text-xl mb-4`}>
+          Join the Testing Revolution
+        </motion.h2>
+        <motion.h1
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className={`text-5xl font-bold ${aclonica.className} uppercase text-center mb-6`}>
+          Start Your <span className="text-4xl font-bold text-amber-800">QA Journey</span>
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className='text-lg mt-4 max-w-md text-center'>
+          Create your account and dive into real projects. Earn points, unlock achievements, and showcase your testing skills in our gamified platform.
+        </motion.p>
+      </div>
+
+      {/* Right Side - Signup Form */}
+      <div className='flex flex-col items-center justify-center w-full md:w-1/2 p-6 md:p-16 z-10 relative text-white'>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="w-full max-w-md"
-        >
-          {/* Heading */}
+          className='w-full max-w-md rounded-lg shadow-2xl p-8 border border-[#A33C13] relative z-10'>
+
           <motion.h1
             initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, x: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-3xl font-bold uppercase text-center"
-          >
-            Create an Account
+            className={`text-4xl font-bold ${aclonica.className} uppercase text-center mb-4`}>
+            Sign Up
           </motion.h1>
 
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-center mb-6"
+          >
+            Choose your role and get started
+          </motion.p>
+
           {/* Tabs */}
-          <div className="flex flex-row w-full bg-[#ECF0FF] rounded-md overflow-hidden mb-5">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="flex flex-row w-full bg-white/10 backdrop-blur-sm rounded-md overflow-hidden mb-6"
+          >
             <button
               onClick={() => setTab("tester")}
               type="button"
-              className={`w-1/2 py-2 font-medium transition ${tab === "tester"
+              className={`w-1/2 py-3 font-medium transition ${tab === "tester"
                 ? "bg-[#A33C13] text-white"
-                : "text-[#9C9AA5]"
+                : "text-white/70 hover:text-white"
                 }`}
             >
               I&apos;m Tester
@@ -56,17 +95,22 @@ function SignUpPage() {
             <button
               onClick={() => setTab("owner")}
               type="button"
-              className={`w-1/2 py-2 font-medium transition ${tab === "owner"
+              className={`w-1/2 py-3 font-medium transition ${tab === "owner"
                 ? "bg-[#A33C13] text-white"
-                : "text-[#9C9AA5]"
+                : "text-white/70 hover:text-white"
                 }`}
             >
               I&apos;m Product Owner
             </button>
-          </div>
+          </motion.div>
 
           {/* Form */}
-          <div className="flex flex-col gap-3">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="flex flex-col gap-4"
+          >
             {tab === "tester" && (
               <SignupForm
                 role="tester"
@@ -83,19 +127,19 @@ function SignUpPage() {
 
             {/* Divider */}
             <div className="flex items-center my-4">
-              <div className="flex-grow border-t border-[#CBADD7]"></div>
-              <span className="mx-3 text-gray-500">or</span>
-              <div className="flex-grow border-t border-[#CBADD7]"></div>
+              <div className="flex-grow border-t border-white/30"></div>
+              <span className="mx-3 text-white/70">or</span>
+              <div className="flex-grow border-t border-white/30"></div>
             </div>
 
             {/* Footer */}
-            <p className="text-center text-gray-600">
+            <p className="text-center text-white/70">
               Already a user?{" "}
-              <Link href="/signin" className="text-blue-600 hover:underline">
+              <Link href="/signin" className="text-amber-300 hover:text-amber-200 hover:underline">
                 Login here
               </Link>
             </p>
-          </div>
+          </motion.div>
         </motion.div>
       </div>
     </div>

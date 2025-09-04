@@ -37,13 +37,14 @@ export default function SignupForm({ role, onSubmit }: SignupFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {inputs.map((field, index) => (
         <ThemeInput
           key={index}
           label={field.label}
           placeHolder={field.placeholder}
           type={field.type}
+          variant="transparent"
         />
       ))}
 
