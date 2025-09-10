@@ -32,7 +32,7 @@ export default function ThemeButton({
       whileTap={{ scale: 0.98 }}
       type={type}
       onClick={onClick}
-      className={`w-full px-8 py-4 rounded-lg font-medium text-lg transition-all duration-300 ${theme[variant]} ${className}`}
+      className={`w-full px-8 py-4 rounded-lg font-medium text-lg transition-all min-w-[150px] whitespace-nowrap duration-300 ${theme[variant]} ${className}`}
     >
       {children}
     </motion.button>

@@ -324,8 +324,6 @@ export default function Home() {
             <div className="flex items-start space-x-3">
               <motion.div
                 className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0"
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 3, repeat: Infinity }}
               >
                 <span className="text-white text-sm">💡</span>
               </motion.div>
@@ -388,8 +386,8 @@ export default function Home() {
                   transition={{ duration: 0.5 }}
                 >
                   <motion.div
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
+                    // animate={{ scale: [1, 1.1, 1] }}
+                    // transition={{ duration: 2, repeat: Infinity }}
                     className="w-10 h-10"
                   >
                     <Image 
@@ -440,7 +438,7 @@ export default function Home() {
               >
                 {/* Bug Trail Animation */}
                 <motion.div
-                  className="absolute top-2 right-2 text-bug-purple text-sm opacity-20"
+                  className="absolute top-2 right-2 text-sm opacity-20"
                   animate={{ 
                     x: [0, -200, -400],
                     y: [0, 20, 40],
@@ -459,11 +457,11 @@ export default function Home() {
                   }}
                 >
                   <motion.div
-                    animate={{ 
-                      rotate: [0, 5, -5, 0],
-                      scale: [1, 1.1, 1]
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
+                    // animate={{ 
+                    //   rotate: [0, 5, -5, 0],
+                    //   scale: [1, 1.1, 1]
+                    // }}
+                    // transition={{ duration: 2, repeat: Infinity }}
                     className="w-10 h-10"
                   >
                     <Image 
