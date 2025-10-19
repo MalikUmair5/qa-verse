@@ -54,6 +54,8 @@ function Sidebar() {
 
   // Function to check if current path is active
   const isActivePath = (itemPath: string) => {
+    console.log('Current Pathname:', pathname);
+    console.log('Checking Path:', itemPath);
     return pathname === itemPath || pathname.startsWith(itemPath + '/');
   };
 
@@ -75,7 +77,7 @@ function Sidebar() {
 
   return (
     <motion.aside
-      className="bg-[#F3ECE9] w-80 min-h-screen flex flex-col shadow-lg"
+      className="bg-[#F3ECE9] w-80 flex flex-col shadow-lg h-screen min-h-screen"
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
@@ -85,26 +87,19 @@ function Sidebar() {
       <nav className="flex-1 p-6 space-y-2">
         {menuItems.map((item, index) => (
           <Link href={item.path} key={item.label}>
-            <motion.div
+            <div
               className={`
               flex items-center space-x-4 px-4 py-4 rounded-xl transition-all duration-300
               ${isActivePath(item.path)
-                  ? 'bg-[#D4A574] text-foreground shadow-md'
-                  : 'text-foreground hover:bg-white/50 hover:shadow-sm'
+                  ? 'bg-[#A33C13]/25 hover:bg-[#A33C13] hover:text-[#ffffff] text-[#A33C13] shadow-md'
+                  : 'text-[#171717] hover:bg-white/50 hover:shadow-sm'
                 }
               `}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.5 }}
-              whileHover={{
-                scale: item.isActive ? 1.02 : 1.05,
-                x: item.isActive ? 0 : 5
-              }}
-              whileTap={{ scale: 0.98 }}
+          
             >
               {item.icon}
               <span className="text-lg font-medium">{item.label}</span>
-            </motion.div>
+            </div>
           </Link>
         ))}
       </nav>

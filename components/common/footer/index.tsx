@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 function Footer() {
   return (
     <motion.footer 
-      className="bg-secondary border-t border-gray-200 shadow-sm bg-[#F3ECE9]"
+      className="bg-[#F3ECE9] border-t border-gray-200 shadow-sm"
       initial={{ y: 100, opacity: 0 }}
       whileInView={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
@@ -27,19 +27,19 @@ function Footer() {
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#A33C13] rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">QA</span>
               </div>
-              <h3 className="text-xl font-bold text-foreground">QA-VERSE</h3>
+              <h3 className="text-xl font-bold text-[#171717]">QA-VERSE</h3>
             </motion.div>
-            <p className="text-muted mb-6 leading-relaxed">
+            <p className="text-[#9C9AA5] mb-6 leading-relaxed">
               Your comprehensive platform for quality assurance and testing solutions.
               Building better software through better testing.
             </p>
             <div className="flex space-x-4">
               <motion.a 
                 href="#" 
-                className="text-muted hover:text-primary transition-colors"
+                className="text-[#9C9AA5] hover:text-[#A33C13] transition-colors"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
@@ -47,7 +47,7 @@ function Footer() {
               </motion.a>
               <motion.a 
                 href="#" 
-                className="text-muted hover:text-primary transition-colors"
+                className="text-[#9C9AA5] hover:text-[#A33C13] transition-colors"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
@@ -55,7 +55,7 @@ function Footer() {
               </motion.a>
               <motion.a 
                 href="#" 
-                className="text-muted hover:text-primary transition-colors"
+                className="text-[#9C9AA5] hover:text-[#A33C13] transition-colors"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
@@ -71,12 +71,12 @@ function Footer() {
             transition={{ delay: 0.3, duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h4 className="font-semibold mb-4 text-foreground">Quick Links</h4>
+            <h4 className="font-semibold mb-4 text-[#171717]">Quick Links</h4>
             <ul className="space-y-3">
               <li>
                 <motion.a 
                   href="#" 
-                  className="text-muted hover:text-primary transition-colors"
+                  className="text-[#9C9AA5] hover:text-[#A33C13] transition-colors"
                   whileHover={{ x: 5 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
@@ -86,7 +86,7 @@ function Footer() {
               <li>
                 <motion.a 
                   href="#" 
-                  className="text-muted hover:text-primary transition-colors"
+                  className="text-[#9C9AA5] hover:text-[#A33C13] transition-colors"
                   whileHover={{ x: 5 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
@@ -96,7 +96,7 @@ function Footer() {
               <li>
                 <motion.a 
                   href="#" 
-                  className="text-muted hover:text-primary transition-colors"
+                  className="text-[#9C9AA5] hover:text-[#A33C13] transition-colors"
                   whileHover={{ x: 5 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
@@ -106,7 +106,7 @@ function Footer() {
               <li>
                 <motion.a 
                   href="#" 
-                  className="text-muted hover:text-primary transition-colors"
+                  className="text-[#9C9AA5] hover:text-[#A33C13] transition-colors"
                   whileHover={{ x: 5 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
@@ -123,8 +123,8 @@ function Footer() {
             transition={{ delay: 0.4, duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h4 className="font-semibold mb-4 text-foreground">Contact</h4>
-            <div className="space-y-3 text-muted">
+            <h4 className="font-semibold mb-4 text-[#171717]">Contact</h4>
+            <div className="space-y-3 text-[#9C9AA5]">
               <motion.p
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 300 }}
@@ -155,8 +155,8 @@ function Footer() {
           transition={{ delay: 0.5, duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h4 className="font-semibold mb-4 text-foreground">Stay Updated</h4>
-          <p className="text-muted mb-6">Get the latest updates on QA trends and testing best practices</p>
+          <h4 className="font-semibold mb-4 text-[#171717]">Stay Updated</h4>
+          <p className="text-[#9C9AA5] mb-6">Get the latest updates on QA trends and testing best practices</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
             <motion.div 
               className="flex-grow"
@@ -165,7 +165,7 @@ function Footer() {
               <input 
                 type="email" 
                 placeholder="Enter your email"
-                className="w-full px-4 py-3 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-4 py-3 rounded-lg border border-[#CBADD7] focus:outline-none focus:ring-2 focus:ring-[#A33C13] focus:border-transparent"
               />
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -178,13 +178,13 @@ function Footer() {
 
         {/* Bottom Bar */}
         <motion.div 
-          className="border-t border-border mt-8 pt-6 text-center"
+          className="border-t border-[#CBADD7] mt-8 pt-6 text-center"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <p className="text-muted">
+          <p className="text-[#9C9AA5]">
             © 2025 QA-VERSE. All rights reserved.
           </p>
         </motion.div>
