@@ -1,13 +1,24 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { FiEdit, FiLogOut } from 'react-icons/fi'
 import { MdLockOutline } from 'react-icons/md'
+import Loader from '@/components/ui/loader'
 
 function ProfilePage() {
   const [fullName, setFullName] = useState('Jojo Smith')
   const [email, setEmail] = useState('shapiqi@example.com')
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Simulate loading data
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 1000)
+
+    return () => clearTimeout(timer)
+  }, [])
 
   const handleEditProfile = () => {
     console.log('Edit Profile')
@@ -25,11 +36,16 @@ function ProfilePage() {
     console.log('Logout')
   }
 
+  // Show loader while loading
+  if (isLoading) {
+    return <Loader />
+  }
+
   return (
     <div className='flex-1 bg-[#FFFCFB] min-h-screen'>
-      <div className='p-8'>
+      <div className='p-6'>
         {/* Header */}
-        <div className='mb-8'>
+        <div className='mb-6'>
           <h1 className='text-4xl font-bold text-[#171717] mb-2'>My Profile</h1>
           <p className='text-[#171717] text-lg'>Manage your account setting and preferences</p>
         </div>

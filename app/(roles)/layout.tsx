@@ -1,7 +1,7 @@
 'use client'
 import Header from "@/components/common/header";
 import Sidebar from "@/components/common/Sidebar";
-import Footer from "@/components/common/footer";
+import SimpleFooter from "@/components/common/SimpleFooter";
 import Loader from "@/components/ui/loader";
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
@@ -110,16 +110,16 @@ export default function RootLayout({
 // Separate component to use the loading context
 const LayoutContent = ({ children }: { children: ReactNode }) => {
   const { isLoading } = useLoading();
-  const { isExpanded } = useSidebar();
+  const { isExpanded, toggleSidebar } = useSidebar();
 
   return (
     <>
       <Sidebar />
-      <Header authenticated={true} />
+      <Header authenticated={true} hasSidebar={true} toggleSidebar={toggleSidebar} isExpanded={isExpanded} />
       <div className="flex">
         {/* Main content area with dynamic left margin based on sidebar state */}
         <div className={`flex-1 transition-all duration-300 pt-20 ${isExpanded ? 'ml-80' : 'ml-20'}`}>
-          <main className="min-h-screen pb-64">
+          <main className="min-h-screen">
             {isLoading && (
               <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
                 <div className="bg-white rounded-2xl shadow-2xl p-8">
@@ -132,7 +132,7 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
           </main>
         </div>
       </div>
-      <Footer />
+      <SimpleFooter />
     </>
   );
 };

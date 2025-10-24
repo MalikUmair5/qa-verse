@@ -1,15 +1,14 @@
 'use client'
-import React, { use, useState } from 'react'
+import React, { useEffect, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
-import ThemeButton from '@/components/ui/button'
 import { MdOutlineDashboard } from "react-icons/md";
 import { ImProfile } from "react-icons/im";
 import { RiTrophyLine } from "react-icons/ri";
 import { CgProfile } from "react-icons/cg";
 import { IoIosLogOut } from "react-icons/io";
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useSidebar } from '@/app/(roles)/layout'
 
 
@@ -50,21 +49,56 @@ const menuItems: MenuItem[] = [
 ]
 
 
-function Sidebar() {
+function SidebarContent() {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isExpanded } = useSidebar();
+
+  // Get query parameter to check where user came from
+  const fromParam = searchParams.get('from');
+
+  // Debug logging
+  useEffect(() => {
+    if (pathname.startsWith('/tester/project-details/')) {
+      console.log('🔍 Debug - Current pathname:', pathname);
+      console.log('🔍 Debug - fromParam:', fromParam);
+    }
+  }, [pathname, fromParam]);
 
   // Function to check if current path is active
   const isActivePath = (itemPath: string) => {
-    return pathname === itemPath || pathname.startsWith(itemPath + '/');
+    // Direct match
+    if (pathname === itemPath) return true;
+    
+    // Check if it's a child route (but not project-details which is handled separately)
+    if (!pathname.startsWith('/tester/project-details/') && pathname.startsWith(itemPath + '/')) {
+      return true;
+    }
+    
+    // Special handling for project details - keep parent active based on origin
+    if (pathname.startsWith('/tester/project-details/')) {
+      // IMPORTANT: Check My Projects FIRST before Dashboard
+      if (itemPath === '/tester/projects' && fromParam === 'projects') {
+        console.log('✅ Activating My Projects');
+        return true;
+      }
+      // Only activate Dashboard if explicitly from dashboard
+      if (itemPath === '/tester/Dashboard' && fromParam === 'dashboard') {
+        console.log('✅ Activating Dashboard');
+        return true;
+      }
+      // No default activation - return false if no match
+    }
+    
+    return false;
   };
 
   // Handle logout
   const handleLogout = async () => {
     try {
       console.log('Logging out...');
-      router.push('/login');
+      router.push('/signin');
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -196,6 +230,15 @@ function Sidebar() {
         </div>
       </motion.aside>
     </>
+  )
+}
+
+// Main Sidebar component with Suspense boundary
+function Sidebar() {
+  return (
+    <Suspense fallback={<div className="w-20 h-screen bg-[#F3ECE9] fixed left-0 top-0" />}>
+      <SidebarContent />
+    </Suspense>
   )
 }
 

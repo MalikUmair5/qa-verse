@@ -1,6 +1,7 @@
 "use client";
 import ThemeInput from "@/components/ui/themeInput";
 import ThemeButton from "@/components/ui/button";
+import Link from "next/link";
 
 interface SignupFormProps {
   role: "tester" | "developer";
@@ -48,10 +49,13 @@ export default function SignupForm({ role, onSubmit }: SignupFormProps) {
         />
       ))}
 
-      <ThemeButton variant="primary" type="submit">
-        Signup
-      </ThemeButton>
 
+
+      <Link href="/tester/Dashboard" className=" cursor-pointer">
+        <ThemeButton variant="primary" type="submit">
+          Signup
+        </ThemeButton>
+      </Link>
 
     </form>
   );
