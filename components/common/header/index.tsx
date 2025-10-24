@@ -1,35 +1,61 @@
 'use client'
-import ThemeButton from '@/components/ui/button'
 import React from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
+import ThemeButton from '@/components/ui/button'
+import { HiMenuAlt2 } from 'react-icons/hi'
 
-function Header({ authenticated }: { authenticated?: boolean }) {
+interface HeaderProps {
+  authenticated?: boolean
+  hasSidebar?: boolean
+  toggleSidebar?: () => void
+  isExpanded?: boolean
+}
+
+function Header({ authenticated, hasSidebar = false, toggleSidebar, isExpanded = false }: HeaderProps) {
+
   return (
     <motion.header
-      className="bg-secondary border-b border-gray-200 shadow-sm bg-[#F3ECE9]"
+      className={`fixed top-0 bg-secondary border-b border-gray-200 shadow-sm bg-[#F3ECE9] z-40 transition-all duration-300 ${
+        hasSidebar && isExpanded ? 'left-80 right-0' : hasSidebar ? 'left-20 right-0' : 'left-0 right-0'
+      }`}
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
     >
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo/Brand */}
-          <motion.div
-            className="flex items-center space-x-2"
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <Image
-              src="/headerLogo.png"
-              alt="Find Projects"
-              width={25}
-              height={25}
-              className="object-contain"
-            />
-            <h1 className="text-xl font-bold text-foreground">QA-VERSE</h1>
-          </motion.div>
+          {/* Toggle Button - Only show when sidebar exists */}
+          {hasSidebar && (
+            <motion.button
+              onClick={toggleSidebar}
+              className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-white/50 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <HiMenuAlt2 size={24} className="text-[#A33C13]" />
+            </motion.button>
+          )}
+          
+          {/* Logo for non-sidebar pages */}
+          {!hasSidebar && (
+            <Link href="/">
+              <motion.div
+                className="flex items-center space-x-2"
+                whileHover={{ scale: 1.05 }}
+              >
+                <Image
+                  src="/headerLogo.png"
+                  alt="QA-VERSE Logo"
+                  width={32}
+                  height={32}
+                  className="object-contain"
+                />
+                <h1 className="text-xl font-bold text-[#171717]">QA-VERSE</h1>
+              </motion.div>
+            </Link>
+          )}
 
           {authenticated ? (
             <motion.div

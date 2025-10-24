@@ -1,12 +1,11 @@
 import React from 'react'
-import ProfilePage from '@/components/roles/tester/ProfilePage'
+import ProjectsPage from '@/components/roles/tester/ProjectsPage'
 
 function Page() {
   return (
     <>
-      <ProfilePage />
+      <ProjectsPage />
     </>
-
   )
 }
 

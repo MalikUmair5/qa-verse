@@ -83,8 +83,9 @@ function LoginPage() {
               placeholder="Password"
               className="mt-4 p-2  mb-4 w-full bg-transparent border-b-2 active:border-amber-500 focus:border-amber-500 outline-none"
             />
-            <ThemeButton variant="primary" type="submit">Login</ThemeButton>
-
+            <Link href="/tester/Dashboard" className=" cursor-pointer">
+              <ThemeButton variant="primary" type="submit">Login</ThemeButton>
+            </Link>
 
             <Link href="/signup" className=" cursor-pointer">
               <button>

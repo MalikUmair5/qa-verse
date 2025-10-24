@@ -1,16 +1,30 @@
 "use client"
 import ProjectCard from '@/components/ui/projectCard'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { FiSearch } from 'react-icons/fi'
+import { useRouter } from 'next/navigation'
+import Loader from '@/components/ui/loader'
 
 function Dashboard() {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedDifficulty, setSelectedDifficulty] = useState('all')
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Simulate loading data
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 1000)
+
+    return () => clearTimeout(timer)
+  }, [])
 
   const projects = [
     {
+      id: '1',
       title: 'QuantumLeap CRM',
       description: 'A next-generation CRM for optimizing sales pipelines and...',
       category: 'Functionality',
@@ -20,6 +34,7 @@ function Dashboard() {
       image: '/window.svg'
     },
     {
+      id: '2',
       title: 'QuantumLeap CRM',
       description: 'A next-generation CRM for optimizing sales pipelines and...',
       category: 'Functionality',
@@ -29,6 +44,7 @@ function Dashboard() {
       image: '/window.svg'
     },
     {
+      id: '3',
       title: 'QuantumLeap CRM',
       description: 'A next-generation CRM for optimizing sales pipelines and...',
       category: 'Functionality',
@@ -38,6 +54,7 @@ function Dashboard() {
       image: '/window.svg'
     },
     {
+      id: '4',
       title: 'QuantumLeap CRM',
       description: 'A next-generation CRM for optimizing sales pipelines and...',
       category: 'Functionality',
@@ -48,17 +65,26 @@ function Dashboard() {
     },
   ]
 
+  const handleViewProject = (projectId: string) => {
+    router.push(`/tester/project-details/${projectId}?from=dashboard`)
+  }
+
+  // Show loader while loading
+  if (isLoading) {
+    return <Loader />
+  }
+
   return (
     <div className='flex-1 bg-[#FFFCFB] min-h-screen'>
-      <div className='p-8'>
+      <div className='p-6'>
         {/* Header Section */}
-        <div className='mb-8'>
+        <div className='mb-6'>
           <h1 className='text-4xl font-bold text-[#171717] mb-2'>Explore Project</h1>
           <p className='text-[#9C9AA5] text-lg'>Find the next exciting project to test and contribute to.</p>
         </div>
 
         {/* Search and Filters */}
-        <div className='grid grid-cols-1 md:grid-cols-12 gap-4 mb-8'>
+        <div className='grid grid-cols-1 md:grid-cols-12 gap-4 mb-6'>
           {/* Search Bar */}
           <div className='md:col-span-6 relative'>
             <FiSearch className='absolute left-4 top-1/2 -translate-y-1/2 text-[#9C9AA5] text-xl' />
@@ -123,7 +149,7 @@ function Dashboard() {
                 participants={project.participants}
                 bugs={project.bugs}
                 image={project.image}
-                onView={() => console.log('View Project')}
+                onView={() => handleViewProject(project.id)}
               />
             </motion.div>
           ))}
