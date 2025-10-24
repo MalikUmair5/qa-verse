@@ -49,7 +49,7 @@ function Dashboard() {
   ]
 
   return (
-    <div className='flex-1 bg-[#FFFCFB] min-h-screen'>
+    <div className='flex-1 bg-[#FFFCFB] min-h-screen overflow-y-scroll'>
       <div className='p-8'>
         {/* Header Section */}
         <div className='mb-8'>

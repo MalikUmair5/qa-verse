@@ -2,11 +2,16 @@
 import ThemeButton from '@/components/ui/button'
 import React from 'react'
 import { motion } from 'framer-motion'
+import { useSidebar } from '@/app/(roles)/layout'
 
 function Footer() {
+  const { isExpanded } = useSidebar();
+
   return (
     <motion.footer 
-      className="bg-[#F3ECE9] border-t border-gray-200 shadow-sm"
+      className={`bg-[#F3ECE9] border-t border-gray-200 shadow-sm transition-all duration-300 ${
+        isExpanded ? 'ml-80' : 'ml-20'
+      }`}
       initial={{ y: 100, opacity: 0 }}
       whileInView={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}

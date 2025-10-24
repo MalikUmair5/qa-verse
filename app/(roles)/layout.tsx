@@ -14,11 +14,28 @@ interface LoadingContextType {
 
 const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
+// Create sidebar context
+interface SidebarContextType {
+  isExpanded: boolean;
+  toggleSidebar: () => void;
+}
+
+const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
+
 // Custom hook to use loading context
 export const useLoading = () => {
   const context = useContext(LoadingContext);
   if (!context) {
     throw new Error('useLoading must be used within a LoadingProvider');
+  }
+  return context;
+};
+
+// Custom hook to use sidebar context
+export const useSidebar = () => {
+  const context = useContext(SidebarContext);
+  if (!context) {
+    throw new Error('useSidebar must be used within a SidebarProvider');
   }
   return context;
 };
@@ -33,7 +50,7 @@ const LoadingProvider = ({ children }: { children: ReactNode }) => {
     try {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       // Here you would typically fetch projects from your API
       console.log('Projects loaded successfully');
     } catch (error) {
@@ -56,6 +73,26 @@ const LoadingProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// Sidebar Provider component
+const SidebarProvider = ({ children }: { children: ReactNode }) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  const toggleSidebar = () => {
+    setIsExpanded(prev => !prev);
+  };
+
+  const value = {
+    isExpanded,
+    toggleSidebar
+  };
+
+  return (
+    <SidebarContext.Provider value={value}>
+      {children}
+    </SidebarContext.Provider>
+  );
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -63,7 +100,9 @@ export default function RootLayout({
 }>) {
   return (
     <LoadingProvider>
-      <LayoutContent>{children}</LayoutContent>
+      <SidebarProvider>
+        <LayoutContent>{children}</LayoutContent>
+      </SidebarProvider>
     </LoadingProvider>
   );
 }
@@ -71,24 +110,29 @@ export default function RootLayout({
 // Separate component to use the loading context
 const LayoutContent = ({ children }: { children: ReactNode }) => {
   const { isLoading } = useLoading();
+  const { isExpanded } = useSidebar();
 
   return (
     <>
+      <Sidebar />
       <Header authenticated={true} />
-      <div className="flex relative">
-        <Sidebar />
-        <main className="flex-1 relative">
-          {isLoading && (
-            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
-              <div className="bg-white rounded-2xl shadow-2xl p-8">
-                <Loader />
-                <p className="text-center mt-4 text-muted font-medium">Loading projects...</p>
+      <div className="flex">
+        {/* Main content area with dynamic left margin based on sidebar state */}
+        <div className={`flex-1 transition-all duration-300 pt-20 ${isExpanded ? 'ml-80' : 'ml-20'}`}>
+          <main className="min-h-screen pb-64">
+            {isLoading && (
+              <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
+                <div className="bg-white rounded-2xl shadow-2xl p-8">
+                  <Loader />
+                  <p className="text-center mt-4 text-muted font-medium">Loading projects...</p>
+                </div>
               </div>
-            </div>
-          )}
-          {children}
-        </main>
+            )}
+            {children}
+          </main>
+        </div>
       </div>
+      <Footer />
     </>
   );
 };
