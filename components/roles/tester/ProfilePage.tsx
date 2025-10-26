@@ -43,25 +43,25 @@ function ProfilePage() {
 
   return (
     <div className='flex-1 bg-[#FFFCFB] min-h-screen'>
-      <div className='p-6'>
+      <div className='p-4 sm:p-6 md:p-8'>
         {/* Header */}
         <div className='mb-6'>
-          <h1 className='text-4xl font-bold text-[#171717] mb-2'>My Profile</h1>
-          <p className='text-[#171717] text-lg'>Manage your account setting and preferences</p>
+          <h1 className='text-2xl sm:text-3xl font-bold text-[#171717] mb-2'>My Profile</h1>
+          <p className='text-sm sm:text-base text-[#171717]'>Manage your account setting and preferences</p>
         </div>
 
         {/* Profile Card */}
         <motion.div 
-          className='bg-[#D9D9D9]/20 rounded-2xl p-8'
+          className='bg-[#D9D9D9]/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 max-w-5xl'
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           {/* Profile Header with Avatar */}
-          <div className='flex items-start gap-6 mb-8 pb-8 border-b border-gray-300'>
+          <div className='flex flex-col sm:flex-row items-start gap-4 sm:gap-6 mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-gray-300'>
             {/* Avatar */}
-            <div className='relative'>
-              <div className='w-24 h-24 rounded-full bg-gray-300 overflow-hidden'>
+            <div className='relative mx-auto sm:mx-0'>
+              <div className='w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gray-300 overflow-hidden'>
                 <Image
                   src='/next.svg'
                   alt='Profile'
@@ -73,21 +73,21 @@ function ProfilePage() {
             </div>
 
             {/* User Info and Actions */}
-            <div className='flex-1'>
-              <h2 className='text-2xl font-bold text-[#171717] mb-1'>Jojo Smith</h2>
-              <p className='text-[#171717] mb-4'>shapiqi@example.com</p>
+            <div className='flex-1 w-full sm:w-auto text-center sm:text-left'>
+              <h2 className='text-xl sm:text-2xl font-bold text-[#171717] mb-1'>Jojo Smith</h2>
+              <p className='text-[#171717] mb-4 text-sm sm:text-base'>shapiqi@example.com</p>
               
-              <div className='flex gap-3'>
+              <div className='flex flex-col sm:flex-row gap-3'>
                 <button
                   onClick={handleEditProfile}
-                  className='flex items-center gap-2 px-4 py-2 bg-[#D4A574] text-[#171717] rounded-lg hover:bg-[#c49563] transition-colors font-medium'
+                  className='flex items-center justify-center gap-2 px-4 py-2 bg-[#D4A574] text-[#171717] rounded-lg hover:bg-[#c49563] transition-colors font-medium text-sm sm:text-base'
                 >
                   <FiEdit size={18} />
                   Edit Profile
                 </button>
                 <button
                   onClick={handleChangeAvatar}
-                  className='px-4 py-2 bg-[#A33C13] text-white rounded-lg hover:bg-[#8a2f0f] transition-colors font-medium'
+                  className='px-4 py-2 bg-[#A33C13] text-white rounded-lg hover:bg-[#8a2f0f] transition-colors font-medium text-sm sm:text-base'
                 >
                   Change Avatar
                 </button>
@@ -96,7 +96,7 @@ function ProfilePage() {
           </div>
 
           {/* Form Section */}
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8'>
             {/* Full Name */}
             <div>
               <label className='block text-[#171717] font-semibold mb-2 text-lg'>
@@ -128,18 +128,18 @@ function ProfilePage() {
 
           {/* Account Action Section */}
           <div>
-            <h3 className='text-xl font-bold text-[#171717] mb-4'>Account Action</h3>
-            <div className='flex flex-wrap gap-4'>
+            <h3 className='text-lg sm:text-xl font-bold text-[#171717] mb-4'>Account Action</h3>
+            <div className='flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4'>
               <button
                 onClick={handleChangePassword}
-                className='flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 text-[#171717] rounded-lg hover:border-[#A33C13] hover:bg-gray-50 transition-all font-medium'
+                className='flex items-center justify-center gap-2 px-6 py-3 bg-white border border-gray-300 text-[#171717] rounded-lg hover:border-[#A33C13] hover:bg-gray-50 transition-all font-medium text-sm sm:text-base'
               >
                 <MdLockOutline size={20} />
                 Change Password
               </button>
               <button
                 onClick={handleLogout}
-                className='flex items-center gap-2 px-6 py-3 bg-[#A33C13] text-white rounded-lg hover:bg-[#8a2f0f] transition-colors font-medium'
+                className='flex items-center justify-center gap-2 px-6 py-3 bg-[#A33C13] text-white rounded-lg hover:bg-[#8a2f0f] transition-colors font-medium text-sm sm:text-base'
               >
                 <FiLogOut size={20} />
                 Logout

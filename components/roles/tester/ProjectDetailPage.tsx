@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { FiArrowLeft } from 'react-icons/fi'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Loader from '@/components/ui/loader'
 
 interface ProjectDetailPageProps {
@@ -11,7 +11,11 @@ interface ProjectDetailPageProps {
 
 function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(true)
+  
+  // Get the 'from' parameter to know where user came from
+  const fromParam = searchParams.get('from') || 'dashboard'
 
   // Simulate loading data
   useEffect(() => {
@@ -66,51 +70,52 @@ function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
   return (
     <div className='min-h-screen bg-[#FFFCFB]'>
 
-      <div className='p-6 max-w-7xl mx-auto'>
+      <div className='p-4 sm:p-6 md:p-8 max-w-7xl mx-auto'>
         {/* Back Button */}
         <motion.button
           onClick={() => router.back()}
-          className='flex items-center gap-2 text-[#171717] mb-6 hover:text-[#A33C13] transition-colors'
+          className='flex items-center gap-2 text-[#171717] mb-4 sm:mb-6 hover:text-[#A33C13] transition-colors'
           whileHover={{ x: -5 }}
         >
           <FiArrowLeft size={20} />
           <span className='font-medium'>Back</span>
         </motion.button>
 
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+        <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8'>
           {/* Left Column - Main Content */}
           <div className='lg:col-span-2'>
             {/* Title and Badges */}
             <div className='mb-6'>
-              <div className='flex items-center gap-3 mb-4'>
-                <span className='px-3 py-1 bg-[#F5E6DD] text-[#171717] rounded-full text-sm font-medium'>
+              <div className='flex flex-wrap items-center gap-2 sm:gap-3 mb-4'>
+                <span className='px-3 py-1 bg-[#F5E6DD] text-[#171717] rounded-full text-xs sm:text-sm font-medium'>
                   {project.category}
                 </span>
-                <span className={`px-3 py-1 ${getDifficultyColor(project.difficulty)} text-white rounded-full text-sm font-medium`}>
+                <span className={`px-3 py-1 ${getDifficultyColor(project.difficulty)} text-white rounded-full text-xs sm:text-sm font-medium`}>
                   {project.difficulty}
                 </span>
               </div>
 
-              <h1 className='text-4xl font-bold text-[#171717] mb-4'>
+              <h1 className='text-2xl sm:text-3xl lg:text-4xl font-bold text-[#171717] mb-4'>
                 {project.title}
               </h1>
 
-              <p className='text-[#171717] text-lg leading-relaxed'>
+              <p className='text-[#171717] text-sm sm:text-base lg:text-lg leading-relaxed'>
                 {project.description}
               </p>
             </div>
 
             {/* Action Buttons */}
-            <div className='flex gap-4 mb-8'>
+            <div className='flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8'>
               <motion.button
-                className='px-6 py-3 bg-[#A33C13] text-white rounded-lg font-medium hover:bg-[#8a2f0f] transition-colors flex items-center gap-2'
+                onClick={() => router.push(`/tester/report-bug?from=${fromParam}`)}
+                className='px-6 py-3 bg-[#A33C13] text-white rounded-lg font-medium hover:bg-[#8a2f0f] transition-colors flex items-center justify-center gap-2 text-sm sm:text-base'
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 Report Bug
               </motion.button>
               <motion.button
-                className='px-6 py-3 border-2 border-[#171717] text-[#171717] rounded-lg font-medium hover:bg-[#171717] hover:text-white transition-colors flex items-center gap-2'
+                className='px-6 py-3 border-2 border-[#171717] text-[#171717] rounded-lg font-medium hover:bg-[#171717] hover:text-white transition-colors flex items-center justify-center gap-2 text-sm sm:text-base'
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -128,16 +133,16 @@ function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
             </div>
 
             {/* Instructions Section */}
-            <div className='mb-8'>
-              <h2 className='text-2xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
+            <div className='mb-6 sm:mb-8'>
+              <h2 className='text-xl sm:text-2xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
                 <span>📋</span>
                 Instructions
               </h2>
-              <div className='bg-[#F5F5F5] rounded-lg p-6'>
+              <div className='bg-[#F5F5F5] rounded-lg p-4 sm:p-6'>
                 <ol className='space-y-3'>
                   {project.instructions.map((instruction, index) => (
-                    <li key={index} className='text-[#171717] flex gap-3'>
-                      <span className='font-semibold'>{index + 1}.</span>
+                    <li key={index} className='text-[#171717] flex gap-2 sm:gap-3 text-sm sm:text-base'>
+                      <span className='font-semibold flex-shrink-0'>{index + 1}.</span>
                       <span>{instruction}</span>
                     </li>
                   ))}
@@ -146,16 +151,16 @@ function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
             </div>
 
             {/* Testing Focus Areas */}
-            <div className='mb-8'>
-              <h2 className='text-2xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
+            <div className='mb-6 sm:mb-8'>
+              <h2 className='text-xl sm:text-2xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
                 <span>🎯</span>
                 Testing Focus Areas
               </h2>
-              <div className='flex flex-wrap gap-3'>
+              <div className='flex flex-wrap gap-2 sm:gap-3'>
                 {project.testingFocusAreas.map((area, index) => (
                   <span
                     key={index}
-                    className='px-4 py-2 bg-[#F5E6DD] text-[#171717] rounded-lg font-medium'
+                    className='px-3 sm:px-4 py-2 bg-[#F5E6DD] text-[#171717] rounded-lg font-medium text-sm sm:text-base'
                   >
                     {area}
                   </span>
@@ -164,16 +169,16 @@ function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
             </div>
 
             {/* Tech Stack */}
-            <div className='mb-8'>
-              <h2 className='text-2xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
+            <div className='mb-6 sm:mb-8'>
+              <h2 className='text-xl sm:text-2xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
                 <span>💻</span>
                 Tech Stack
               </h2>
-              <div className='flex flex-wrap gap-3'>
+              <div className='flex flex-wrap gap-2 sm:gap-3'>
                 {project.techStack.map((tech, index) => (
                   <span
                     key={index}
-                    className='px-4 py-2 bg-[#F5E6DD] text-[#171717] rounded-lg font-medium'
+                    className='px-3 sm:px-4 py-2 bg-[#F5E6DD] text-[#171717] rounded-lg font-medium text-sm sm:text-base'
                   >
                     {tech}
                   </span>
@@ -184,32 +189,32 @@ function ProjectDetailPage({ projectId }: ProjectDetailPageProps) {
 
           {/* Right Column - Project Stats & Info */}
           <div className='lg:col-span-1'>
-            <div className='bg-white rounded-lg shadow-md p-6 sticky top-24'>
-              <h3 className='text-xl font-bold text-[#171717] mb-6'>
+            <div className='bg-white rounded-lg shadow-md p-4 sm:p-6 lg:sticky lg:top-24'>
+              <h3 className='text-lg sm:text-xl font-bold text-[#171717] mb-4 sm:mb-6'>
                 Maintained By
               </h3>
-              <p className='text-[#A33C13] font-medium mb-6'>
+              <p className='text-[#A33C13] font-medium mb-4 sm:mb-6'>
                 {project.maintainedBy}
               </p>
 
-              <h3 className='text-xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
+              <h3 className='text-lg sm:text-xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
                 <span>📊</span>
                 Project Stats
               </h3>
 
-              <div className='space-y-4'>
+              <div className='space-y-3 sm:space-y-4'>
                 <div className='flex items-center justify-between p-3 bg-[#F5F5F5] rounded-lg'>
                   <div className='flex items-center gap-2'>
-                    <span className='text-xl'>🐛</span>
-                    <span className='text-[#171717] font-medium'>Bugs Reported</span>
+                    <span className='text-lg sm:text-xl'>🐛</span>
+                    <span className='text-[#171717] font-medium text-sm sm:text-base'>Bugs Reported</span>
                   </div>
                   <span className='font-bold text-[#171717]'>{project.bugsReported}</span>
                 </div>
 
                 <div className='flex items-center justify-between p-3 bg-[#F5F5F5] rounded-lg'>
                   <div className='flex items-center gap-2'>
-                    <span className='text-xl'>👥</span>
-                    <span className='text-[#171717] font-medium'>Active Testers</span>
+                    <span className='text-lg sm:text-xl'>👥</span>
+                    <span className='text-[#171717] font-medium text-sm sm:text-base'>Active Testers</span>
                   </div>
                   <span className='font-bold text-[#171717]'>{project.activeTesters}</span>
                 </div>

@@ -53,10 +53,31 @@ function SidebarContent() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isExpanded } = useSidebar();
+  const { isExpanded, toggleSidebar } = useSidebar();
 
   // Get query parameter to check where user came from
   const fromParam = searchParams.get('from');
+
+  // Close sidebar on navigation (mobile only)
+  useEffect(() => {
+    if (isExpanded && window.innerWidth < 1024) {
+      toggleSidebar();
+    }
+  }, [pathname]); // Only depend on pathname, not isExpanded or toggleSidebar
+
+  // Prevent body scroll when sidebar is open on mobile
+  useEffect(() => {
+    if (isExpanded && window.innerWidth < 1024) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isExpanded]);
 
   // Debug logging
   useEffect(() => {
@@ -71,8 +92,10 @@ function SidebarContent() {
     // Direct match
     if (pathname === itemPath) return true;
     
-    // Check if it's a child route (but not project-details which is handled separately)
-    if (!pathname.startsWith('/tester/project-details/') && pathname.startsWith(itemPath + '/')) {
+    // Check if it's a child route (but not project-details or report-bug which are handled separately)
+    if (!pathname.startsWith('/tester/project-details/') && 
+        !pathname.startsWith('/tester/report-bug') && 
+        pathname.startsWith(itemPath + '/')) {
       return true;
     }
     
@@ -91,6 +114,20 @@ function SidebarContent() {
       // No default activation - return false if no match
     }
     
+    // Special handling for report-bug - keep parent active based on origin
+    if (pathname.startsWith('/tester/report-bug')) {
+      // Activate My Projects if coming from projects page
+      if (itemPath === '/tester/projects' && fromParam === 'projects') {
+        console.log('✅ Activating My Projects (from report-bug)');
+        return true;
+      }
+      // Activate Dashboard if coming from dashboard
+      if (itemPath === '/tester/Dashboard' && fromParam === 'dashboard') {
+        console.log('✅ Activating Dashboard (from report-bug)');
+        return true;
+      }
+    }
+    
     return false;
   };
 
@@ -106,31 +143,34 @@ function SidebarContent() {
 
   return (
     <>
-      {/* Backdrop for mobile */}
+      {/* Backdrop for mobile - click to close sidebar */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
-            className="fixed inset-0 bg-black/50 z-20 md:hidden"
+            className="fixed inset-0 bg-black/50 z-20 lg:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => {}}
+            onClick={toggleSidebar}
           />
         )}
       </AnimatePresence>
 
       {/* Sidebar */}
       <motion.aside
-        className={`fixed left-0 top-0 bg-[#F3ECE9] flex flex-col shadow-lg h-screen z-30 transition-all duration-300 ${
-          isExpanded ? 'w-80' : 'w-20'
-        }`}
-        initial={{ x: -100, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.3 }}
+        className={`
+          fixed left-0 top-0 bg-[#F3ECE9] flex flex-col shadow-lg h-screen
+          transition-all duration-300
+          ${isExpanded ? 'z-50' : 'z-30'}
+          ${isExpanded ? 'w-80 translate-x-0' : 'w-80 -translate-x-full'}
+          ${isExpanded ? 'lg:w-80 lg:translate-x-0' : 'lg:w-20 lg:translate-x-0'}
+          lg:z-30
+        `}
+        initial={false}
       >
         {/* Logo Section - Always show logo, hide text when collapsed */}
         <motion.div
-          className={`p-6 border-b border-gray-200/50 ${!isExpanded ? 'flex justify-center' : ''}`}
+          className={`p-6 border-b border-gray-200/50 ${!isExpanded ? 'flex justify-center' : 'flex items-center justify-between'}`}
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
@@ -161,6 +201,23 @@ function SidebarContent() {
               )}
             </AnimatePresence>
           </motion.div>
+
+          {/* Close button for mobile */}
+          {isExpanded && (
+            <motion.button
+              onClick={toggleSidebar}
+              className="lg:hidden flex items-center justify-center w-8 h-8 rounded-lg hover:bg-white/50 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <svg className="w-5 h-5 text-[#A33C13]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </motion.button>
+          )}
         </motion.div>
 
         {/* Navigation Menu */}

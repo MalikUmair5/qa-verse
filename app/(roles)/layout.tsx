@@ -1,7 +1,6 @@
 'use client'
 import Header from "@/components/common/header";
 import Sidebar from "@/components/common/Sidebar";
-import SimpleFooter from "@/components/common/SimpleFooter";
 import Loader from "@/components/ui/loader";
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
@@ -75,7 +74,25 @@ const LoadingProvider = ({ children }: { children: ReactNode }) => {
 
 // Sidebar Provider component
 const SidebarProvider = ({ children }: { children: ReactNode }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false); // Default closed on mobile
+
+  // Set initial state based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) { // lg breakpoint
+        setIsExpanded(true);
+      } else {
+        setIsExpanded(false);
+      }
+    };
+
+    // Set initial state
+    handleResize();
+
+    // Listen for resize events
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const toggleSidebar = () => {
     setIsExpanded(prev => !prev);
@@ -118,7 +135,10 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
       <Header authenticated={true} hasSidebar={true} toggleSidebar={toggleSidebar} isExpanded={isExpanded} />
       <div className="flex">
         {/* Main content area with dynamic left margin based on sidebar state */}
-        <div className={`flex-1 transition-all duration-300 pt-20 ${isExpanded ? 'ml-80' : 'ml-20'}`}>
+        <div className={`
+          flex-1 transition-all duration-300 pt-20
+          ${isExpanded ? 'lg:ml-80' : 'lg:ml-20'}
+        `}>
           <main className="min-h-screen">
             {isLoading && (
               <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
@@ -132,7 +152,6 @@ const LayoutContent = ({ children }: { children: ReactNode }) => {
           </main>
         </div>
       </div>
-      <SimpleFooter />
     </>
   );
 };

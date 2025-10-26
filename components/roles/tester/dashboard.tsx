@@ -76,24 +76,24 @@ function Dashboard() {
 
   return (
     <div className='flex-1 bg-[#FFFCFB] min-h-screen'>
-      <div className='p-6'>
+      <div className='p-4 sm:p-6 md:p-8'>
         {/* Header Section */}
         <div className='mb-6'>
-          <h1 className='text-4xl font-bold text-[#171717] mb-2'>Explore Project</h1>
-          <p className='text-[#9C9AA5] text-lg'>Find the next exciting project to test and contribute to.</p>
+          <h1 className='text-2xl sm:text-3xl font-bold text-[#171717] mb-2'>Explore Project</h1>
+          <p className='text-sm sm:text-base text-[#171717]'>Find the next exciting project to test and contribute to.</p>
         </div>
 
         {/* Search and Filters */}
-        <div className='grid grid-cols-1 md:grid-cols-12 gap-4 mb-6'>
+        <div className='grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 mb-6'>
           {/* Search Bar */}
           <div className='md:col-span-6 relative'>
-            <FiSearch className='absolute left-4 top-1/2 -translate-y-1/2 text-[#9C9AA5] text-xl' />
+            <FiSearch className='absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-[#9C9AA5] text-lg sm:text-xl' />
             <input
               type='text'
               placeholder='Search for projects'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className='w-full pl-12 pr-4 py-3 border-2 border-[#A33C13] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A33C13] focus:border-transparent text-[#171717]'
+              className='w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 border-2 border-[#A33C13] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A33C13] focus:border-transparent text-[#171717] text-sm sm:text-base'
             />
           </div>
 
@@ -102,7 +102,7 @@ function Dashboard() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className='w-full px-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A33C13] text-[#171717] bg-white cursor-pointer hover:border-[#A33C13] transition-colors'
+              className='w-full px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A33C13] text-[#171717] bg-white cursor-pointer hover:border-[#A33C13] transition-colors text-sm sm:text-base'
             >
               <option value='all'>Filter by Category</option>
               <option value='functionality'>Functionality</option>
@@ -117,7 +117,7 @@ function Dashboard() {
             <select
               value={selectedDifficulty}
               onChange={(e) => setSelectedDifficulty(e.target.value)}
-              className='w-full px-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A33C13] text-[#171717] bg-white cursor-pointer hover:border-[#A33C13] transition-colors'
+              className='w-full px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A33C13] text-[#171717] bg-white cursor-pointer hover:border-[#A33C13] transition-colors text-sm sm:text-base'
             >
               <option value='all'>Filter by Difficulty</option>
               <option value='easy'>Easy</option>
@@ -128,12 +128,7 @@ function Dashboard() {
         </div>
 
         {/* Projects Grid */}
-        <motion.div 
-          className='flex flex-wrap gap-6'
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6'>
           {projects.map((project, index) => (
             <motion.div
               key={index}
@@ -153,7 +148,7 @@ function Dashboard() {
               />
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </div>
   )

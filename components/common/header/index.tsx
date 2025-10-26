@@ -17,9 +17,12 @@ function Header({ authenticated, hasSidebar = false, toggleSidebar, isExpanded =
 
   return (
     <motion.header
-      className={`fixed top-0 bg-secondary border-b border-gray-200 shadow-sm bg-[#F3ECE9] z-40 transition-all duration-300 ${
-        hasSidebar && isExpanded ? 'left-80 right-0' : hasSidebar ? 'left-20 right-0' : 'left-0 right-0'
-      }`}
+      className={`
+        fixed top-0 bg-secondary border-b border-gray-200 shadow-sm bg-[#F3ECE9] z-40 
+        transition-all duration-300
+        ${hasSidebar && isExpanded ? 'left-0 lg:left-80' : hasSidebar ? 'left-0 lg:left-20' : 'left-0'}
+        right-0
+      `}
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
