@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 
@@ -26,6 +26,15 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onView,
   className = ''
 }) => {
+  const [isNavigating, setIsNavigating] = useState(false)
+
+  const handleViewClick = () => {
+    if (onView) {
+      setIsNavigating(true)
+      onView()
+    }
+  }
+
   const getDifficultyColor = (level: string) => {
     switch (level) {
       case 'Easy':
@@ -112,15 +121,28 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
           {/* View Button */}
           <motion.button
-            onClick={onView}
-            className="flex items-center gap-1 text-[#171717] font-medium hover:text-[#A33C13] transition-colors group"
+            onClick={handleViewClick}
+            disabled={isNavigating}
+            className="flex items-center gap-1 text-[#171717] font-medium hover:text-[#A33C13] transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
             whileHover={{ x: 3 }}
             whileTap={{ scale: 0.95 }}
           >
-            <span className="text-sm">View</span>
-            <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            {isNavigating ? (
+              <>
+                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span className="text-sm">Loading...</span>
+              </>
+            ) : (
+              <>
+                <span className="text-sm">View</span>
+                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </>
+            )}
           </motion.button>
         </div>
       </div>

@@ -94,7 +94,7 @@ export default function Home() {
         {/* Hero Section */}
         <section
           ref={heroRef}
-          className="relative min-h-[80vh] flex items-center justify-center bg-gradient-to-br from-secondary via-background to-background-alt overflow-hidden"
+          className=" mt-30 md:mt-20 relative min-h-[80vh] flex items-center justify-center bg-gradient-to-br from-secondary via-background to-background-alt overflow-hidden"
         >
           {/* Floating Background Elements & Testing Animations */}
           <div className="absolute inset-0 overflow-hidden">

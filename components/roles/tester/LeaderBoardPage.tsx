@@ -52,8 +52,8 @@ const TopTesterCard: React.FC<TopTesterProps> = ({ name, rank, xp, image, bgColo
         {image ? (
           <Image src={image} alt={name} width={96} height={96} className="object-cover" />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-2xl">
-            {name.charAt(0)}
+          <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-xl md:text-3xl">
+            {name.charAt(0).toUpperCase()}
           </div>
         )}
       </div>
@@ -97,8 +97,8 @@ const TesterRow: React.FC<TesterRowProps> = ({ rank, name, xp, bugsFound, badges
           {image ? (
             <Image src={image} alt={name} width={40} height={40} className="object-cover" />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-white font-bold text-sm">
-              {name.charAt(0)}
+            <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-white font-bold text-sm md:text-base">
+              {name.charAt(0).toUpperCase()}
             </div>
           )}
         </div>
