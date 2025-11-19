@@ -1,10 +1,12 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import { useProjects } from '@/hooks/useProjects'
 import Loader from '@/components/ui/loader'
 
 interface ProjectCardProps {
+  id: string
   title: string
   description: string
   participants: number
@@ -93,33 +95,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
 function ProjectsPage() {
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(true)
-
-  // Simulate loading data
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
-
-    return () => clearTimeout(timer)
-  }, [])
-  
-  const projects = [
-    {
-      id: '1',
-      title: 'Quantum Leap CRM',
-      description: 'A next-generation CRM for optimizing sales pipelines and...',
-      participants: 12,
-      bugs: 12,
-    },
-    {
-      id: '2',
-      title: 'Quantum Leap CRM',
-      description: 'A next-generation CRM for optimizing sales pipelines and...',
-      participants: 12,
-      bugs: 12,
-    },
-  ]
+  const { projects, isLoading } = useProjects({})
 
   const handleViewProject = (projectId: string) => {
     router.push(`/tester/project-details/${projectId}?from=projects`)
@@ -129,7 +105,6 @@ function ProjectsPage() {
     router.push('/tester/report-bug?from=projects')
   }
 
-  // Show loader while loading
   if (isLoading) {
     return <Loader />
   }
@@ -152,13 +127,17 @@ function ProjectsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {projects.map((project, index) => (
               <motion.div
-                key={index}
+                key={project.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <ProjectCard 
-                  {...project} 
+                  id={project.id}
+                  title={project.title}
+                  description={project.description}
+                  participants={project.participants || 0}
+                  bugs={project.bugsFound || 0}
                   onView={() => handleViewProject(project.id)}
                   onReportBug={handleReportBug}
                 />

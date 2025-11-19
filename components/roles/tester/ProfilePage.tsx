@@ -4,21 +4,22 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { FiEdit, FiLogOut } from 'react-icons/fi'
 import { MdLockOutline } from 'react-icons/md'
+import { useAuth } from '@/hooks/useAuth'
+import { useAnalytics } from '@/hooks/useAnalytics'
 import Loader from '@/components/ui/loader'
 
 function ProfilePage() {
-  const [fullName, setFullName] = useState('Jojo Smith')
-  const [email, setEmail] = useState('shapiqi@example.com')
-  const [isLoading, setIsLoading] = useState(true)
+  const { user, isLoading: authLoading } = useAuth()
+  const { analytics, isLoading: analyticsLoading } = useAnalytics(user?.id || '')
+  const [fullName, setFullName] = useState('')
+  const [email, setEmail] = useState('')
 
-  // Simulate loading data
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
-
-    return () => clearTimeout(timer)
-  }, [])
+    if (user) {
+      setFullName(user.name)
+      setEmail(user.email)
+    }
+  }, [user])
 
   const handleEditProfile = () => {
     console.log('Edit Profile')
@@ -37,7 +38,7 @@ function ProfilePage() {
   }
 
   // Show loader while loading
-  if (isLoading) {
+  if (authLoading || analyticsLoading) {
     return <Loader />
   }
 
@@ -74,8 +75,8 @@ function ProfilePage() {
 
             {/* User Info and Actions */}
             <div className='flex-1 w-full sm:w-auto text-center sm:text-left'>
-              <h2 className='text-xl sm:text-2xl font-bold text-[#171717] mb-1'>Jojo Smith</h2>
-              <p className='text-[#171717] mb-4 text-sm sm:text-base'>shapiqi@example.com</p>
+              <h2 className='text-xl sm:text-2xl font-bold text-[#171717] mb-1'>{fullName}</h2>
+              <p className='text-[#171717] mb-4 text-sm sm:text-base'>{email}</p>
               
               <div className='flex flex-col sm:flex-row gap-3'>
                 <button
@@ -95,7 +96,32 @@ function ProfilePage() {
             </div>
           </div>
 
-          {/* Form Section */}
+          {/* Statistics Section */}
+          {analytics && (
+            <div className='mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-gray-300'>
+              <h3 className='text-lg sm:text-xl font-bold text-[#171717] mb-4'>Your Statistics</h3>
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+                <div className='bg-white rounded-lg p-4 text-center'>
+                  <p className='text-2xl font-bold text-[#A33C13]'>{analytics.totalBugs}</p>
+                  <p className='text-sm text-gray-600'>Total Bugs</p>
+                </div>
+                <div className='bg-white rounded-lg p-4 text-center'>
+                  <p className='text-2xl font-bold text-green-600'>{analytics.approvedBugs}</p>
+                  <p className='text-sm text-gray-600'>Approved</p>
+                </div>
+                <div className='bg-white rounded-lg p-4 text-center'>
+                  <p className='text-2xl font-bold text-yellow-600'>{analytics.pendingBugs}</p>
+                  <p className='text-sm text-gray-600'>Pending</p>
+                </div>
+                <div className='bg-white rounded-lg p-4 text-center'>
+                  <p className='text-2xl font-bold text-blue-600'>{analytics.successRate}%</p>
+                  <p className='text-sm text-gray-600'>Success Rate</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Form Fields */}
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8'>
             {/* Full Name */}
             <div>

@@ -2,11 +2,12 @@
 import React, { useEffect, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
-import { MdOutlineDashboard } from "react-icons/md";
+import { MdOutlineDashboard, MdBugReport, MdNotifications } from "react-icons/md";
 import { ImProfile } from "react-icons/im";
 import { RiTrophyLine } from "react-icons/ri";
 import { CgProfile } from "react-icons/cg";
-import { IoIosLogOut } from "react-icons/io";
+import { IoIosLogOut, IoMdSettings } from "react-icons/io";
+import { FiMessageSquare, FiBarChart2, FiAward } from "react-icons/fi";
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useSidebar } from '@/app/(roles)/layout'
@@ -14,7 +15,7 @@ import { useSidebar } from '@/app/(roles)/layout'
 
 
 interface MenuItem {
-  label: "Dashboard" | "My Projects" | "Leaderboard" | "Profile";
+  label: string;
   isActive: boolean;
   icon: React.ReactNode;
   path: string;
@@ -35,16 +36,52 @@ const menuItems: MenuItem[] = [
     path: '/tester/projects'
   },
   {
+    label: "My Bug Reports",
+    isActive: false,
+    icon: <MdBugReport size={20} />,
+    path: '/tester/my-bug-reports'
+  },
+  {
     label: "Leaderboard",
     isActive: false,
     icon: <CgProfile size={20} />,
     path: '/tester/leader-board'
   },
   {
+    label: "Analytics",
+    isActive: false,
+    icon: <FiBarChart2 size={20} />,
+    path: '/tester/analytics'
+  },
+  {
+    label: "Achievements",
+    isActive: false,
+    icon: <FiAward size={20} />,
+    path: '/tester/achievements'
+  },
+  {
+    label: "Messages",
+    isActive: false,
+    icon: <FiMessageSquare size={20} />,
+    path: '/tester/chat'
+  },
+  {
+    label: "Notifications",
+    isActive: false,
+    icon: <MdNotifications size={20} />,
+    path: '/tester/notifications'
+  },
+  {
     label: "Profile",
     isActive: false,
     icon: <ImProfile size={20} />,
     path: '/tester/profile'
+  },
+  {
+    label: "Settings",
+    isActive: false,
+    icon: <IoMdSettings size={20} />,
+    path: '/tester/settings'
   }
 ]
 
@@ -92,38 +129,39 @@ function SidebarContent() {
     // Direct match
     if (pathname === itemPath) return true;
     
-    // Check if it's a child route (but not project-details or report-bug which are handled separately)
-    if (!pathname.startsWith('/tester/project-details/') && 
-        !pathname.startsWith('/tester/report-bug') && 
-        pathname.startsWith(itemPath + '/')) {
-      return true;
+    // Check if it's a child route
+    if (pathname.startsWith(itemPath + '/')) {
+      // For My Bug Reports, handle the detail page
+      if (itemPath === '/tester/my-bug-reports' && pathname.startsWith('/tester/my-bug-reports/')) {
+        return true;
+      }
+      // For other pages, exclude special routes
+      if (!pathname.startsWith('/tester/project-details/') && 
+          !pathname.startsWith('/tester/report-bug')) {
+        return true;
+      }
     }
     
     // Special handling for project details - keep parent active based on origin
     if (pathname.startsWith('/tester/project-details/')) {
       // IMPORTANT: Check My Projects FIRST before Dashboard
       if (itemPath === '/tester/projects' && fromParam === 'projects') {
-        console.log('✅ Activating My Projects');
         return true;
       }
       // Only activate Dashboard if explicitly from dashboard
       if (itemPath === '/tester/Dashboard' && fromParam === 'dashboard') {
-        console.log('✅ Activating Dashboard');
         return true;
       }
-      // No default activation - return false if no match
     }
     
     // Special handling for report-bug - keep parent active based on origin
     if (pathname.startsWith('/tester/report-bug')) {
       // Activate My Projects if coming from projects page
       if (itemPath === '/tester/projects' && fromParam === 'projects') {
-        console.log('✅ Activating My Projects (from report-bug)');
         return true;
       }
       // Activate Dashboard if coming from dashboard
       if (itemPath === '/tester/Dashboard' && fromParam === 'dashboard') {
-        console.log('✅ Activating Dashboard (from report-bug)');
         return true;
       }
     }

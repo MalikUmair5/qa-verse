@@ -1,8 +1,9 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Loader from '@/components/ui/loader'
+import { useLeaderboard } from '@/hooks/useLeaderboard'
 
 interface TopTesterProps {
   name: string
@@ -15,8 +16,9 @@ interface TopTesterProps {
 interface TesterRowProps {
   rank: number
   name: string
-  username: string
   xp: number
+  bugsFound: number
+  badges: number
   image?: string
 }
 
@@ -50,7 +52,9 @@ const TopTesterCard: React.FC<TopTesterProps> = ({ name, rank, xp, image, bgColo
         {image ? (
           <Image src={image} alt={name} width={96} height={96} className="object-cover" />
         ) : (
-          <div className="w-full h-full bg-gray-300 rounded-full"></div>
+          <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-2xl">
+            {name.charAt(0)}
+          </div>
         )}
       </div>
 
@@ -74,7 +78,7 @@ const TopTesterCard: React.FC<TopTesterProps> = ({ name, rank, xp, image, bgColo
   )
 }
 
-const TesterRow: React.FC<TesterRowProps> = ({ rank, name, username, xp, image }) => {
+const TesterRow: React.FC<TesterRowProps> = ({ rank, name, xp, bugsFound, badges, image }) => {
   return (
     <motion.div
       className="bg-gray-100 hover:bg-gray-200 transition-colors duration-200 rounded-lg py-3 px-3 md:px-4 flex items-center justify-between"
@@ -93,14 +97,16 @@ const TesterRow: React.FC<TesterRowProps> = ({ rank, name, username, xp, image }
           {image ? (
             <Image src={image} alt={name} width={40} height={40} className="object-cover" />
           ) : (
-            <div className="w-full h-full bg-gray-400"></div>
+            <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-white font-bold text-sm">
+              {name.charAt(0)}
+            </div>
           )}
         </div>
 
         {/* Name and Username */}
         <div className="min-w-0 flex-1">
           <div className="font-semibold text-gray-900 text-sm md:text-base truncate">{name}</div>
-          <div className="text-xs md:text-sm text-gray-500 truncate">@{username}</div>
+          <div className="text-xs md:text-sm text-gray-500">{bugsFound} bugs • {badges} badges</div>
         </div>
       </div>
 
@@ -116,32 +122,23 @@ const TesterRow: React.FC<TesterRowProps> = ({ rank, name, username, xp, image }
 }
 
 function LeaderBoardPage() {
-  const [isLoading, setIsLoading] = useState(true)
-
-  // Simulate loading data
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
-
-    return () => clearTimeout(timer)
-  }, [])
-
-  const topTesters = [
-    { name: 'Jam Smith', rank: 2, xp: 1200, bgColor: 'bg-gray-300' },
-    { name: 'Jojo Smith', rank: 1, xp: 2200, bgColor: 'bg-yellow-200' },
-    { name: 'John Smith', rank: 3, xp: 800, bgColor: 'bg-orange-200' },
-  ]
-
-  const otherTesters = [
-    { rank: 4, name: 'Henrietta O&apos;Connell', username: 'enrietta', xp: 750 },
-    { rank: 5, name: 'Henrietta O&apos;Connell', username: 'enrietta', xp: 624 },
-  ]
+  const [period, setPeriod] = useState<'all' | 'weekly' | 'monthly'>('all')
+  const { leaderboard, isLoading, error } = useLeaderboard(period)
 
   // Show loader while loading
   if (isLoading) {
     return <Loader />
   }
+
+  const topTesters = leaderboard.slice(0, 3).map((entry) => ({
+    name: entry.name,
+    rank: entry.rank,
+    xp: entry.xp,
+    image: entry.profilePicture,
+    bgColor: entry.rank === 1 ? 'bg-yellow-200' : entry.rank === 2 ? 'bg-gray-300' : 'bg-orange-200'
+  }))
+
+  const otherTesters = leaderboard.slice(3)
 
   return (
     <div className="min-h-screen bg-[#FFFCFB]">
@@ -158,6 +155,12 @@ function LeaderBoardPage() {
             See who&apos;s leading the pack of bug hunting and earning the most xp
           </p>
         </div>
+
+        {error && (
+          <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6'>
+            {error}
+          </div>
+        )}
 
         {/* Top 3 Podium - Horizontal on mobile, Vertical podium on desktop */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-center gap-3 md:gap-6 mb-6 md:mb-8 max-w-5xl mx-auto">
@@ -183,7 +186,15 @@ function LeaderBoardPage() {
           {/* Table Body */}
           <div className="bg-white rounded-b-lg shadow-lg p-3 md:p-4 space-y-2">
             {otherTesters.map((tester) => (
-              <TesterRow key={tester.rank} {...tester} />
+              <TesterRow 
+                key={tester.rank} 
+                rank={tester.rank}
+                name={tester.name}
+                xp={tester.xp}
+                bugsFound={tester.bugsFound}
+                badges={tester.badges}
+                image={tester.profilePicture}
+              />
             ))}
           </div>
         </div>

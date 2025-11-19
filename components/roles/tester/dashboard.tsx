@@ -1,69 +1,24 @@
 "use client"
 import ProjectCard from '@/components/ui/projectCard'
-import React, { useState, useEffect } from 'react'
+import ActivityFeed from './ActivityFeed'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FiSearch } from 'react-icons/fi'
 import { useRouter } from 'next/navigation'
 import Loader from '@/components/ui/loader'
+import { useProjects } from '@/hooks/useProjects'
 
 function Dashboard() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedDifficulty, setSelectedDifficulty] = useState('all')
-  const [isLoading, setIsLoading] = useState(true)
 
-  // Simulate loading data
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
-
-    return () => clearTimeout(timer)
-  }, [])
-
-  const projects = [
-    {
-      id: '1',
-      title: 'QuantumLeap CRM',
-      description: 'A next-generation CRM for optimizing sales pipelines and...',
-      category: 'Functionality',
-      difficulty: 'Medium' as const,
-      participants: 12,
-      bugs: 12,
-      image: '/window.svg'
-    },
-    {
-      id: '2',
-      title: 'QuantumLeap CRM',
-      description: 'A next-generation CRM for optimizing sales pipelines and...',
-      category: 'Functionality',
-      difficulty: 'Easy' as const,
-      participants: 12,
-      bugs: 12,
-      image: '/window.svg'
-    },
-    {
-      id: '3',
-      title: 'QuantumLeap CRM',
-      description: 'A next-generation CRM for optimizing sales pipelines and...',
-      category: 'Functionality',
-      difficulty: 'Hard' as const,
-      participants: 12,
-      bugs: 12,
-      image: '/window.svg'
-    },
-    {
-      id: '4',
-      title: 'QuantumLeap CRM',
-      description: 'A next-generation CRM for optimizing sales pipelines and...',
-      category: 'Functionality',
-      difficulty: 'Medium' as const,
-      participants: 12,
-      bugs: 12,
-      image: '/window.svg'
-    },
-  ]
+  const { projects, isLoading, error } = useProjects({
+    category: selectedCategory,
+    difficulty: selectedDifficulty,
+    search: searchQuery,
+  })
 
   const handleViewProject = (projectId: string) => {
     router.push(`/tester/project-details/${projectId}?from=dashboard`)
@@ -120,34 +75,54 @@ function Dashboard() {
               className='w-full px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A33C13] text-[#171717] bg-white cursor-pointer hover:border-[#A33C13] transition-colors text-sm sm:text-base'
             >
               <option value='all'>Filter by Difficulty</option>
-              <option value='easy'>Easy</option>
-              <option value='medium'>Medium</option>
-              <option value='hard'>Hard</option>
+              <option value='Easy'>Easy</option>
+              <option value='Medium'>Medium</option>
+              <option value='Hard'>Hard</option>
             </select>
           </div>
         </div>
 
-        {/* Projects Grid */}
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6'>
-          {projects.map((project, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.5 }}
-            >
-              <ProjectCard
-                title={project.title}
-                description={project.description}
-                category={project.category}
-                difficulty={project.difficulty}
-                participants={project.participants}
-                bugs={project.bugs}
-                image={project.image}
-                onView={() => handleViewProject(project.id)}
-              />
-            </motion.div>
-          ))}
+        {/* Error Message */}
+        {error && (
+          <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg'>
+            {error}
+          </div>
+        )}
+
+        <div className='grid grid-cols-1 lg:grid-cols-4 gap-6'>
+          {/* Projects Grid - 3 columns */}
+          {projects.length === 0 ? (
+            <div className='lg:col-span-3 text-center py-12'>
+              <p className='text-gray-500 text-lg'>No projects found</p>
+            </div>
+          ) : (
+            <div className='lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6'>
+              {projects.map((project, index) => (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                >
+                  <ProjectCard
+                    title={project.title}
+                    description={project.description}
+                    category={project.category}
+                    difficulty={project.difficulty}
+                    participants={project.participants}
+                    bugs={project.bugsFound}
+                    image={project.image}
+                    onView={() => handleViewProject(project.id)}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          )}
+
+          {/* Activity Feed Sidebar - 1 column */}
+          <div className='lg:col-span-1'>
+            <ActivityFeed />
+          </div>
         </div>
       </div>
     </div>

@@ -1,0 +1,464 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "email": "tester1@example.com",
+      "name": "John Doe",
+      "role": "tester",
+      "profilePicture": "/avatars/user1.jpg",
+      "xp": 1250,
+      "rank": 1,
+      "joinedDate": "2024-01-15",
+      "badges": ["bug-hunter", "ui-expert", "first-bug"],
+      "stats": {
+        "totalBugs": 45,
+        "approvedBugs": 38,
+        "rejectedBugs": 7,
+        "successRate": 84,
+        "projectsTested": 12
+      }
+    },
+    {
+      "id": "2",
+      "email": "tester2@example.com",
+      "name": "Jane Smith",
+      "role": "tester",
+      "profilePicture": "/avatars/user2.jpg",
+      "xp": 980,
+      "rank": 2,
+      "joinedDate": "2024-02-20",
+      "badges": ["bug-hunter", "security-expert"],
+      "stats": {
+        "totalBugs": 32,
+        "approvedBugs": 28,
+        "rejectedBugs": 4,
+        "successRate": 87,
+        "projectsTested": 8
+      }
+    },
+    {
+      "id": "3",
+      "email": "maintainer1@example.com",
+      "name": "Alice Johnson",
+      "role": "maintainer",
+      "profilePicture": "/avatars/user3.jpg",
+      "joinedDate": "2024-01-10",
+      "stats": {
+        "totalProjects": 5,
+        "totalBugsReceived": 78,
+        "resolvedBugs": 65,
+        "pendingBugs": 13
+      }
+    }
+  ],
+  "projects": [
+    {
+      "id": "1",
+      "title": "QuantumLeap CRM",
+      "description": "A next-generation CRM for optimizing sales pipelines and customer relationships. Help us test the dashboard, reporting features, and user management.",
+      "category": "Web",
+      "techStack": ["React", "Node.js", "MongoDB", "TypeScript"],
+      "difficulty": "Medium",
+      "testingUrl": "https://demo.quantumleap.com",
+      "status": "Active",
+      "maintainerId": "3",
+      "maintainerName": "Alice Johnson",
+      "createdDate": "2024-10-15",
+      "testingFocus": ["UI/UX", "Functionality", "Performance"],
+      "participants": 12,
+      "bugsFound": 23,
+      "bugsResolved": 18,
+      "image": "/window.svg"
+    },
+    {
+      "id": "2",
+      "title": "EcoTrack Mobile App",
+      "description": "Environmental tracking app for carbon footprint monitoring. We need testers to verify GPS tracking, data visualization, and offline mode.",
+      "category": "Mobile",
+      "techStack": ["React Native", "Firebase", "Redux"],
+      "difficulty": "Easy",
+      "testingUrl": "https://app.ecotrack.io",
+      "status": "Active",
+      "maintainerId": "3",
+      "maintainerName": "Alice Johnson",
+      "createdDate": "2024-11-01",
+      "testingFocus": ["Functionality", "Usability"],
+      "participants": 8,
+      "bugsFound": 15,
+      "bugsResolved": 12,
+      "image": "/window.svg"
+    },
+    {
+      "id": "3",
+      "title": "CodeCollab IDE",
+      "description": "Real-time collaborative code editor with syntax highlighting. Focus on testing multi-user editing, syntax support, and theme customization.",
+      "category": "Web",
+      "techStack": ["Vue.js", "WebSocket", "Express"],
+      "difficulty": "Hard",
+      "testingUrl": "https://codecollab.dev",
+      "status": "Active",
+      "maintainerId": "3",
+      "maintainerName": "Alice Johnson",
+      "createdDate": "2024-09-20",
+      "testingFocus": ["Performance", "Security", "Functionality"],
+      "participants": 15,
+      "bugsFound": 35,
+      "bugsResolved": 28,
+      "image": "/window.svg"
+    }
+  ],
+  "bugReports": [
+    {
+      "id": "1",
+      "projectId": "1",
+      "projectTitle": "QuantumLeap CRM",
+      "testerId": "1",
+      "testerName": "John Doe",
+      "title": "Login button unresponsive on mobile",
+      "description": "When accessing the login page on mobile devices (tested on iPhone 13), the login button does not respond to touch events. Users have to tap multiple times.",
+      "category": "UI",
+      "severity": "High",
+      "status": "Approved",
+      "stepsToReproduce": [
+        "Open the app on iOS device (iPhone 13, iOS 16)",
+        "Navigate to login page",
+        "Enter valid credentials",
+        "Tap the login button",
+        "Observe that button doesn't respond on first tap"
+      ],
+      "expectedBehavior": "Login button should respond to single tap and proceed to dashboard",
+      "actualBehavior": "Button requires multiple taps to register the action",
+      "attachments": [
+        {
+          "type": "image",
+          "url": "/bug-screenshots/bug1-1.png",
+          "name": "login-page-mobile.png"
+        },
+        {
+          "type": "video",
+          "url": "/bug-videos/bug1-1.mp4",
+          "name": "login-tap-issue.mp4"
+        }
+      ],
+      "xpAwarded": 50,
+      "createdDate": "2024-11-15T10:30:00Z",
+      "updatedDate": "2024-11-16T14:20:00Z",
+      "comments": [
+        {
+          "id": "c1",
+          "userId": "3",
+          "userName": "Alice Johnson",
+          "userRole": "maintainer",
+          "comment": "Thanks for reporting this! We've identified the issue - it's a CSS z-index problem. Fix will be deployed tomorrow.",
+          "createdDate": "2024-11-16T09:15:00Z"
+        },
+        {
+          "id": "c2",
+          "userId": "1",
+          "userName": "John Doe",
+          "userRole": "tester",
+          "comment": "Great! Happy to help. Let me know when it's fixed so I can verify.",
+          "createdDate": "2024-11-16T14:20:00Z"
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "projectId": "1",
+      "projectTitle": "QuantumLeap CRM",
+      "testerId": "1",
+      "testerName": "John Doe",
+      "title": "Dashboard charts not loading with large datasets",
+      "description": "When viewing the analytics dashboard with date range > 6 months, the charts fail to load and show a spinner indefinitely.",
+      "category": "Performance",
+      "severity": "Critical",
+      "status": "Pending",
+      "stepsToReproduce": [
+        "Login to the dashboard",
+        "Navigate to Analytics section",
+        "Select date range: Last 12 months",
+        "Observe loading spinner that never completes"
+      ],
+      "expectedBehavior": "Charts should load within 3 seconds regardless of data size",
+      "actualBehavior": "Loading spinner continues indefinitely, charts never render",
+      "attachments": [
+        {
+          "type": "image",
+          "url": "/bug-screenshots/bug2-1.png",
+          "name": "analytics-loading.png"
+        }
+      ],
+      "xpAwarded": 0,
+      "createdDate": "2024-11-18T08:45:00Z",
+      "updatedDate": "2024-11-18T08:45:00Z",
+      "comments": []
+    },
+    {
+      "id": "3",
+      "projectId": "2",
+      "projectTitle": "EcoTrack Mobile App",
+      "testerId": "2",
+      "testerName": "Jane Smith",
+      "title": "GPS tracking drains battery quickly",
+      "description": "Continuous GPS tracking feature causes significant battery drain - approximately 40% per hour.",
+      "category": "Performance",
+      "severity": "Medium",
+      "status": "Resolved",
+      "stepsToReproduce": [
+        "Enable GPS tracking feature",
+        "Monitor battery usage for 1 hour",
+        "Check battery statistics"
+      ],
+      "expectedBehavior": "Battery drain should not exceed 15% per hour",
+      "actualBehavior": "Battery drains at 40% per hour",
+      "attachments": [
+        {
+          "type": "image",
+          "url": "/bug-screenshots/bug3-1.png",
+          "name": "battery-stats.png"
+        }
+      ],
+      "xpAwarded": 30,
+      "createdDate": "2024-11-10T13:20:00Z",
+      "updatedDate": "2024-11-17T16:30:00Z",
+      "comments": [
+        {
+          "id": "c3",
+          "userId": "3",
+          "userName": "Alice Johnson",
+          "userRole": "maintainer",
+          "comment": "We've optimized the GPS polling interval. Please test the latest version.",
+          "createdDate": "2024-11-17T16:30:00Z"
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "projectId": "1",
+      "projectTitle": "QuantumLeap CRM",
+      "testerId": "1",
+      "testerName": "John Doe",
+      "title": "Typo in welcome email",
+      "description": "Welcome email contains typo: 'Wellcome' instead of 'Welcome'",
+      "category": "UI",
+      "severity": "Low",
+      "status": "Rejected",
+      "stepsToReproduce": [
+        "Create new account",
+        "Check welcome email"
+      ],
+      "expectedBehavior": "Correct spelling 'Welcome'",
+      "actualBehavior": "Typo shows 'Wellcome'",
+      "attachments": [],
+      "xpAwarded": 0,
+      "createdDate": "2024-11-12T11:00:00Z",
+      "updatedDate": "2024-11-13T09:30:00Z",
+      "rejectionReason": "This was already reported and fixed in the last update.",
+      "comments": [
+        {
+          "id": "c4",
+          "userId": "3",
+          "userName": "Alice Johnson",
+          "userRole": "maintainer",
+          "comment": "Thanks, but this was already fixed in v1.2.3",
+          "createdDate": "2024-11-13T09:30:00Z"
+        }
+      ]
+    }
+  ],
+  "notifications": [
+    {
+      "id": "1",
+      "userId": "1",
+      "type": "bug_approved",
+      "title": "Bug Report Approved",
+      "message": "Your bug report 'Login button unresponsive on mobile' has been approved! You earned 50 XP.",
+      "read": false,
+      "createdDate": "2024-11-16T14:20:00Z",
+      "relatedId": "1",
+      "relatedType": "bug"
+    },
+    {
+      "id": "2",
+      "userId": "1",
+      "type": "comment",
+      "title": "New Comment on Bug Report",
+      "message": "Alice Johnson commented on your bug report 'Login button unresponsive on mobile'",
+      "read": false,
+      "createdDate": "2024-11-16T09:15:00Z",
+      "relatedId": "1",
+      "relatedType": "bug"
+    },
+    {
+      "id": "3",
+      "userId": "1",
+      "type": "badge_earned",
+      "title": "New Badge Earned!",
+      "message": "Congratulations! You've earned the 'Bug Hunter' badge for finding 10 bugs.",
+      "read": true,
+      "createdDate": "2024-11-14T18:30:00Z",
+      "relatedId": "bug-hunter",
+      "relatedType": "badge"
+    },
+    {
+      "id": "4",
+      "userId": "3",
+      "type": "new_bug",
+      "title": "New Bug Report",
+      "message": "John Doe reported a new bug in your project 'QuantumLeap CRM'",
+      "read": false,
+      "createdDate": "2024-11-18T08:45:00Z",
+      "relatedId": "2",
+      "relatedType": "bug"
+    }
+  ],
+  "achievements": [
+    {
+      "id": "first-bug",
+      "name": "First Bug",
+      "description": "Submit your first bug report",
+      "icon": "🐛",
+      "category": "milestone",
+      "xpRequired": 0,
+      "level": 1
+    },
+    {
+      "id": "bug-hunter",
+      "name": "Bug Hunter",
+      "description": "Find and report 10 bugs",
+      "icon": "🎯",
+      "category": "discovery",
+      "xpRequired": 0,
+      "level": 2
+    },
+    {
+      "id": "ui-expert",
+      "name": "UI Expert",
+      "description": "Report 5 UI/UX bugs",
+      "icon": "🎨",
+      "category": "specialty",
+      "xpRequired": 0,
+      "level": 2
+    },
+    {
+      "id": "security-expert",
+      "name": "Security Expert",
+      "description": "Report 3 security vulnerabilities",
+      "icon": "🔒",
+      "category": "specialty",
+      "xpRequired": 0,
+      "level": 3
+    },
+    {
+      "id": "top-tester",
+      "name": "Top Tester",
+      "description": "Reach #1 on the leaderboard",
+      "icon": "👑",
+      "category": "competitive",
+      "xpRequired": 1000,
+      "level": 4
+    },
+    {
+      "id": "team-player",
+      "name": "Team Player",
+      "description": "Help test 5 different projects",
+      "icon": "🤝",
+      "category": "collaboration",
+      "xpRequired": 0,
+      "level": 2
+    }
+  ],
+  "chatMessages": [
+    {
+      "id": "1",
+      "conversationId": "conv-1-3",
+      "senderId": "1",
+      "senderName": "John Doe",
+      "senderRole": "tester",
+      "receiverId": "3",
+      "message": "Hi Alice, I have a question about the bug I reported regarding the login button.",
+      "createdDate": "2024-11-16T10:00:00Z",
+      "read": true
+    },
+    {
+      "id": "2",
+      "conversationId": "conv-1-3",
+      "senderId": "3",
+      "senderName": "Alice Johnson",
+      "senderRole": "maintainer",
+      "receiverId": "1",
+      "message": "Sure! What would you like to know?",
+      "createdDate": "2024-11-16T10:05:00Z",
+      "read": true
+    },
+    {
+      "id": "3",
+      "conversationId": "conv-1-3",
+      "senderId": "1",
+      "senderName": "John Doe",
+      "senderRole": "tester",
+      "receiverId": "3",
+      "message": "Does this issue also occur on Android devices, or is it iOS specific?",
+      "createdDate": "2024-11-16T10:07:00Z",
+      "read": true
+    },
+    {
+      "id": "4",
+      "conversationId": "conv-1-3",
+      "senderId": "3",
+      "senderName": "Alice Johnson",
+      "senderRole": "maintainer",
+      "receiverId": "1",
+      "message": "Good question! It appears to be iOS-specific. We haven't had reports from Android users.",
+      "createdDate": "2024-11-16T10:10:00Z",
+      "read": false
+    }
+  ],
+  "leaderboard": [
+    {
+      "rank": 1,
+      "userId": "1",
+      "name": "John Doe",
+      "profilePicture": "/avatars/user1.jpg",
+      "xp": 1250,
+      "bugsFound": 45,
+      "badges": 3
+    },
+    {
+      "rank": 2,
+      "userId": "2",
+      "name": "Jane Smith",
+      "profilePicture": "/avatars/user2.jpg",
+      "xp": 980,
+      "bugsFound": 32,
+      "badges": 2
+    },
+    {
+      "rank": 3,
+      "userId": "4",
+      "name": "Bob Wilson",
+      "profilePicture": "/avatars/user4.jpg",
+      "xp": 850,
+      "bugsFound": 28,
+      "badges": 2
+    },
+    {
+      "rank": 4,
+      "userId": "5",
+      "name": "Sarah Davis",
+      "profilePicture": "/avatars/user5.jpg",
+      "xp": 720,
+      "bugsFound": 22,
+      "badges": 1
+    },
+    {
+      "rank": 5,
+      "userId": "6",
+      "name": "Mike Chen",
+      "profilePicture": "/avatars/user6.jpg",
+      "xp": 650,
+      "bugsFound": 19,
+      "badges": 1
+    }
+  ]
+}
