@@ -1,14 +1,119 @@
 'use client'
 
-import React from 'react'
-import loginBGImage from "../../../public/loginBGImage.png"
-import Image from 'next/image'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { aclonica } from '@/app/layout'
 import ThemeButton from '@/components/ui/button'
 import Link from 'next/link'
+import { login } from '@/lib/api/auth/login'
+import toast from 'react-hot-toast'
+import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { loginSchema, LoginFormData } from '@/lib/schemas/auth'
 
 function LoginPage() {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const {
+    register: registerField,
+    handleSubmit,
+    formState: { errors, isValid, dirtyFields }
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: "onChange", // Real-time validation
+    defaultValues: {
+      email: "",
+      password: ""
+    }
+  });
+
+  const handleLogin = async (data: LoginFormData) => {
+
+    setLoading(true);
+    
+    // Show loading toast
+    const loadingToast = toast.loading('Signing you in...', {
+      style: {
+        background: '#2d1810',
+        color: '#ffffff',
+        border: '1px solid #A33C13',
+      },
+    });
+
+    try {
+      const res = await login(data);
+      if (res) {
+        // Dismiss loading toast
+        toast.dismiss(loadingToast);
+        
+        // Show success toast
+        toast.success(`Welcome, ${res.user.fullname}!`, {
+          duration: 4000,
+          style: {
+            background: '#1f4a2d',
+            color: '#ffffff',
+            border: '1px solid #22c55e',
+          },
+          iconTheme: {
+            primary: '#22c55e',
+            secondary: '#ffffff',
+          },
+        });
+
+        // Redirect based on role
+        setTimeout(() => {
+          if (res.user.role === 'tester') {
+            router.push('/tester/Dashboard');
+          } else if (res.user.role === 'maintainer' || res.user.role === 'project_owner') {
+            router.push('/maintainer/dashboard');
+          } else {
+            router.push('/dashboard'); // fallback route for unknown roles
+          }
+        }, 1000);
+      }
+    }
+    catch (error: unknown) {
+      // Dismiss loading toast
+      toast.dismiss(loadingToast);
+      
+      // Show error toast
+      let errorMessage = 'Login failed. Please try again.';
+      
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
+        
+        if (axiosError.response?.status === 401) {
+          errorMessage = 'Invalid email or password';
+        } else if (axiosError.response?.status === 400) {
+          errorMessage = 'Please check your credentials';
+        } else if (axiosError.response?.data?.message) {
+          errorMessage = axiosError.response.data.message;
+        }
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = (error as { message: string }).message;
+      }
+
+      toast.error(errorMessage, {
+        duration: 5000,
+        style: {
+          background: '#4a1f1f',
+          color: '#ffffff',
+          border: '1px solid #ef4444',
+        },
+        iconTheme: {
+          primary: '#ef4444',
+          secondary: '#ffffff',
+        },
+      });
+    }
+    finally {
+      setLoading(false);
+    }
+  }
+
+
   return (
     <>
       <div className="min-h-screen flex flex-col md:flex-row overflow-hidden relative">
@@ -74,26 +179,69 @@ function LoginPage() {
             </motion.p>
 
             <input
-              type="text"
+              {...registerField("email")}
+              type="email"
               placeholder="Email"
-              className="mt-4 p-2  w-full bg-transparent border-b-2 active:border-amber-500 focus:border-amber-500 outline-none"
+              className={`mt-4 p-2 w-full bg-transparent border-b-2 outline-none transition-colors ${
+                errors.email 
+                  ? 'border-red-500 focus:border-red-400' 
+                  : dirtyFields.email && !errors.email
+                  ? 'border-green-500 focus:border-green-400'
+                  : 'border-white/30 focus:border-amber-500'
+              }`}
             />
+            {errors.email && (
+              <motion.p 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-red-400 text-sm mt-1"
+              >
+                {errors.email.message}
+              </motion.p>
+            )}
             <input
+              {...registerField("password")}
               type="password"
               placeholder="Password"
-              className="mt-4 p-2  mb-4 w-full bg-transparent border-b-2 active:border-amber-500 focus:border-amber-500 outline-none"
+              className={`mt-4 p-2 mb-4 w-full bg-transparent border-b-2 outline-none transition-colors ${
+                errors.password 
+                  ? 'border-red-500 focus:border-red-400' 
+                  : dirtyFields.password && !errors.password
+                  ? 'border-green-500 focus:border-green-400'
+                  : 'border-white/30 focus:border-amber-500'
+              }`}
             />
-            <Link href="/tester/Dashboard" className=" cursor-pointer">
-              <ThemeButton variant="primary" type="submit">Login</ThemeButton>
-            </Link>
+            {errors.password && (
+              <motion.p 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-red-400 text-sm mt-1 mb-4"
+              >
+                {errors.password.message}
+              </motion.p>
+            )}
+            <ThemeButton
+              variant="primary" 
+              type="submit"
+              onClick={handleSubmit(handleLogin)}
+              disabled={loading || !isValid}
+              className={loading || !isValid ? "opacity-75 cursor-not-allowed" : ""}
+            >
+              {loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <span>Signing in...</span>
+                </div>
+              ) : (
+                "Login"
+              )}
+            </ThemeButton>
 
             <Link href="/signup" className=" cursor-pointer">
               <button>
                 Don’t Have An Account? Signup
               </button>
             </Link>
-
-
 
             <div className="mt-4 text-center text-sm text-white/60">
               <a href="#" className="hover:underline">
