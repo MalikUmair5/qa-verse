@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import Cookies from 'js-cookie'; // Import js-cookie
 import { user } from '@/lib/api/auth/login';
 
 interface AuthState {
@@ -16,7 +17,7 @@ interface AuthState {
     clearTokens: () => void;
 }
 
-// Simple encryption/decryption functions for additional security
+// Simple encryption/decryption functions
 const encrypt = (text: string): string => {
     try {
         return btoa(encodeURIComponent(text));
@@ -41,7 +42,6 @@ const encryptedStorage = {
         try {
             const parsed = JSON.parse(item);
             if (parsed.state) {
-                // Decrypt sensitive data
                 if (parsed.state.refreshToken) {
                     parsed.state.refreshToken = decrypt(parsed.state.refreshToken);
                 }
@@ -58,7 +58,6 @@ const encryptedStorage = {
         try {
             const parsed = JSON.parse(value);
             if (parsed.state) {
-                // Encrypt sensitive data before storing
                 if (parsed.state.refreshToken) {
                     parsed.state.refreshToken = encrypt(parsed.state.refreshToken);
                 }
@@ -78,59 +77,84 @@ const encryptedStorage = {
 
 export const useAuthStore = create<AuthState>()(
     persist(
-        (set, get) => ({
+        (set) => ({
             user: null,
-            accessToken: null, // This will not be persisted
+            accessToken: null,
             refreshToken: null,
             isAuthenticated: false,
 
-            setAuth: (user, accessToken, refreshToken) => set(() => ({
-                user,
-                accessToken,
-                refreshToken,
-                isAuthenticated: true
-            })),
+            setAuth: (user, accessToken, refreshToken) => {
+                // 1. Set Access Token Cookie
+                Cookies.set('accessToken', accessToken, {
+                    expires: 1,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'strict'
+                });
 
-            // Called on Silent Refresh
-            setAccessToken: (accessToken) => set({ accessToken }),
+                // 2. NEW: Set User Role Cookie (So Middleware can see it!)
+                if (user.role) {
+                    Cookies.set('userRole', user.role, {
+                        expires: 1,
+                        secure: process.env.NODE_ENV === 'production',
+                        sameSite: 'strict'
+                    });
+                }
 
-            // Update refresh token
+                set(() => ({
+                    user,
+                    accessToken,
+                    refreshToken,
+                    isAuthenticated: true
+                }));
+            },
+
+            setAccessToken: (accessToken) => {
+                Cookies.set('accessToken', accessToken, {
+                    expires: 1,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'strict'
+                });
+                set({ accessToken });
+            },
+
             setRefreshToken: (refreshToken) => set({ refreshToken }),
 
-            // Clear only tokens but keep user logged in state
-            clearTokens: () => set({ 
-                accessToken: null, 
-                refreshToken: null 
-            }),
+            clearTokens: () => {
+                Cookies.remove('accessToken');
+                Cookies.remove('userRole'); // Remove role cookie
+                set({
+                    accessToken: null,
+                    refreshToken: null
+                });
+            },
 
-            // Called on Logout
-            logout: () => set({
-                user: null,
-                accessToken: null,
-                refreshToken: null,
-                isAuthenticated: false
-            }),
+            logout: () => {
+                Cookies.remove('accessToken');
+                Cookies.remove('userRole'); // Remove role cookie
+                set({
+                    user: null,
+                    accessToken: null,
+                    refreshToken: null,
+                    isAuthenticated: false
+                });
+            },
         }),
         {
             name: 'auth-storage',
             storage: createJSONStorage(() => encryptedStorage),
-            // Only persist specific fields (exclude accessToken for security)
             partialize: (state) => ({
                 user: state.user,
                 refreshToken: state.refreshToken,
                 isAuthenticated: state.isAuthenticated,
-                // Deliberately exclude accessToken - keep it in memory only
             }),
-            // Rehydrate function to handle state restoration
             onRehydrateStorage: () => (state) => {
                 if (state) {
-                    // Clear accessToken on app restart (security measure)
                     state.accessToken = null;
-                    
-                    // Validate if we still have a valid refresh token
                     if (!state.refreshToken) {
                         state.isAuthenticated = false;
                         state.user = null;
+                        Cookies.remove('accessToken');
+                        Cookies.remove('userRole'); // Ensure cleanup
                     }
                 }
             },

@@ -4,7 +4,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { aclonica } from '@/app/layout';
 import { useAuthStore } from '@/store/authStore';
-import AuthWrapper from '@/components/auth/AuthWrapper';
 
 function MaintainerDashboard() {
   const { user } = useAuthStore();
@@ -77,8 +76,6 @@ function MaintainerDashboard() {
 
 export default function Page() {
   return (
-    <AuthWrapper protectedRoute={true} requiredRole="maintainer">
-      <MaintainerDashboard />
-    </AuthWrapper>
+    <MaintainerDashboard />
   );
 }

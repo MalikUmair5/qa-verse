@@ -65,7 +65,7 @@ function LoginPage() {
         // Redirect based on role
         setTimeout(() => {
           if (res.user.role === 'tester') {
-            router.push('/tester/Dashboard');
+            router.push('/tester/dashboard');
           } else if (res.user.role === 'maintainer' || res.user.role === 'project_owner') {
             router.push('/maintainer/dashboard');
           } else {
