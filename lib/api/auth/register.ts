@@ -1,0 +1,68 @@
+import axiosInstance from "../axiosInstance";
+
+export interface RegisterPayload {
+    fullname: string;
+    email: string;
+    role: "tester" | "project_owner";
+    password: string;
+    password2: string;
+    avatar?: File | null;
+    bio: string;
+    github_url?: string;
+    linkedin_url?: string;
+}
+
+export interface RegisterResponse {
+    message: string;
+    // Note: The actual API only returns message, not user data or tokens
+    // user?: user;
+    // access?: string;
+    // refresh?: string;
+}
+
+export async function register(payload: RegisterPayload): Promise<RegisterResponse> {
+    try {
+        // Create FormData for file upload
+        const formData = new FormData();
+        
+        // Append all text fields
+        formData.append('fullname', payload.fullname);
+        formData.append('email', payload.email);
+        formData.append('role', payload.role);
+        formData.append('password', payload.password);
+        formData.append('password2', payload.password2);
+        formData.append('bio', payload.bio);
+        
+        if (payload.github_url) {
+            formData.append('github_url', payload.github_url);
+        }
+        
+        if (payload.linkedin_url) {
+            formData.append('linkedin_url', payload.linkedin_url);
+        }
+        
+        // Append avatar file if provided
+        if (payload.avatar) {
+            formData.append('avatar', payload.avatar);
+        }
+
+        const response = await axiosInstance.post<RegisterResponse>(
+            "/auth/register/",
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            }
+        );
+        
+        if (response.status !== 200 && response.status !== 201) {
+            throw new Error("Registration failed");
+        }
+
+        return response.data;
+    } catch (error: unknown) {
+        console.error('Registration error:', error);
+        throw error;
+    }
+}

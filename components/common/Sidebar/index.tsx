@@ -8,8 +8,9 @@ import { RiTrophyLine } from "react-icons/ri";
 import { CgProfile } from "react-icons/cg";
 import { IoIosLogOut } from "react-icons/io";
 import Link from 'next/link';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useSidebar } from '@/app/(roles)/layout'
+import logout from '@/lib/api/auth/logout';
 
 
 
@@ -51,7 +52,6 @@ const menuItems: MenuItem[] = [
 
 function SidebarContent() {
   const pathname = usePathname();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { isExpanded, toggleSidebar } = useSidebar();
 
@@ -63,7 +63,7 @@ function SidebarContent() {
     if (isExpanded && window.innerWidth < 1024) {
       toggleSidebar();
     }
-  }, [pathname]); // Only depend on pathname, not isExpanded or toggleSidebar
+  }, [pathname, isExpanded, toggleSidebar]);
 
   // Prevent body scroll when sidebar is open on mobile
   useEffect(() => {
@@ -132,14 +132,14 @@ function SidebarContent() {
   };
 
   // Handle logout
-  const handleLogout = async () => {
-    try {
-      console.log('Logging out...');
-      router.push('/signin');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
+  // const handleLogout = async () => {
+  //   try {
+  //     console.log('Logging out...');
+  //     router.push('/signin');
+  //   } catch (error) {
+  //     console.error('Logout error:', error);
+  //   }
+  // };
 
   return (
     <>
@@ -259,7 +259,7 @@ function SidebarContent() {
         {/* Log Out Button */}
         <div className="p-4 border-t border-gray-200/50">
           <motion.button
-            onClick={handleLogout}
+            onClick={logout}
             className={`
               w-full flex items-center px-3 py-3 rounded-xl transition-all duration-300
               bg-[#A33C13] text-white hover:bg-[#8a3010] shadow-md

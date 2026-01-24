@@ -2,7 +2,6 @@
 import Image from "next/image";
 import Header from "@/components/common/header";
 import Footer from "@/components/common/footer";
-import ThemeButton from "@/components/ui/button";
 import TypewriterText from "@/components/common/TypewriterText";
 import Loader from "@/components/ui/loader";
 import { motion } from "framer-motion";
@@ -17,7 +16,6 @@ if (typeof window !== "undefined") {
 
 export default function Home() {
   const heroRef = useRef(null);
-  const featuresRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
 

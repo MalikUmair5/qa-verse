@@ -3,10 +3,7 @@ import Dashboard from '@/components/roles/tester/dashboard'
 
 function Page() {
   return (
-    <>
-      <Dashboard />
-    </>
-
+    <Dashboard />
   )
 }
 
