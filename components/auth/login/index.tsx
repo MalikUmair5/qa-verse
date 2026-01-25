@@ -6,7 +6,7 @@ import { aclonica } from '@/app/layout'
 import ThemeButton from '@/components/ui/button'
 import Link from 'next/link'
 import { login } from '@/lib/api/auth/login'
-import toast from 'react-hot-toast'
+import { showToast } from '@/lib/utils/toast'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -34,33 +34,16 @@ function LoginPage() {
     setLoading(true);
     
     // Show loading toast
-    const loadingToast = toast.loading('Signing you in...', {
-      style: {
-        background: '#2d1810',
-        color: '#ffffff',
-        border: '1px solid #A33C13',
-      },
-    });
+    const loadingToast = showToast.loading('Signing you in...');
 
     try {
       const res = await login(data);
       if (res) {
         // Dismiss loading toast
-        toast.dismiss(loadingToast);
+        showToast.dismiss(loadingToast);
         
         // Show success toast
-        toast.success(`Welcome, ${res.user.fullname}!`, {
-          duration: 4000,
-          style: {
-            background: '#1f4a2d',
-            color: '#ffffff',
-            border: '1px solid #22c55e',
-          },
-          iconTheme: {
-            primary: '#22c55e',
-            secondary: '#ffffff',
-          },
-        });
+        showToast.success(`Welcome, ${res.user.fullname}!`);
 
         // Redirect based on role
         setTimeout(() => {
@@ -76,7 +59,7 @@ function LoginPage() {
     }
     catch (error: unknown) {
       // Dismiss loading toast
-      toast.dismiss(loadingToast);
+      showToast.dismiss(loadingToast);
       
       // Show error toast
       let errorMessage = 'Login failed. Please try again.';
@@ -95,18 +78,7 @@ function LoginPage() {
         errorMessage = (error as { message: string }).message;
       }
 
-      toast.error(errorMessage, {
-        duration: 5000,
-        style: {
-          background: '#4a1f1f',
-          color: '#ffffff',
-          border: '1px solid #ef4444',
-        },
-        iconTheme: {
-          primary: '#ef4444',
-          secondary: '#ffffff',
-        },
-      });
+      showToast.error(errorMessage);
     }
     finally {
       setLoading(false);
