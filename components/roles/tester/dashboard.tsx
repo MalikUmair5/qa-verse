@@ -5,6 +5,8 @@ import { motion } from 'framer-motion'
 import { FiSearch } from 'react-icons/fi'
 import { useRouter } from 'next/navigation'
 import Loader from '@/components/ui/loader'
+import { getProjects, ProjectResponse } from '@/lib/api/project-owner/projects'
+import { showToast } from '@/lib/utils/toast'
 
 function Dashboard() {
   const router = useRouter()
@@ -12,66 +14,96 @@ function Dashboard() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedDifficulty, setSelectedDifficulty] = useState('all')
   const [isLoading, setIsLoading] = useState(true)
+  const [projects, setProjects] = useState<ProjectResponse[]>([])
+  const [error, setError] = useState<string | null>(null)
 
-  // Simulate loading data
+  // Fetch projects from API
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
+    const fetchProjects = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        const data = await getProjects()
+        setProjects(data)
+      } catch (error) {
+        console.error('Error fetching projects:', error)
+        setError('Failed to load projects. Please try again later.')
+        showToast.error('Failed to load projects')
+      } finally {
+        setIsLoading(false)
+      }
+    }
 
-    return () => clearTimeout(timer)
+    fetchProjects()
   }, [])
 
-  const projects = [
-    {
-      id: '1',
-      title: 'QuantumLeap CRM',
-      description: 'A next-generation CRM for optimizing sales pipelines and...',
-      category: 'Functionality',
-      difficulty: 'Medium' as const,
-      participants: 12,
-      bugs: 12,
-      image: '/window.svg'
-    },
-    {
-      id: '2',
-      title: 'QuantumLeap CRM',
-      description: 'A next-generation CRM for optimizing sales pipelines and...',
-      category: 'Functionality',
-      difficulty: 'Easy' as const,
-      participants: 12,
-      bugs: 12,
-      image: '/window.svg'
-    },
-    {
-      id: '3',
-      title: 'QuantumLeap CRM',
-      description: 'A next-generation CRM for optimizing sales pipelines and...',
-      category: 'Functionality',
-      difficulty: 'Hard' as const,
-      participants: 12,
-      bugs: 12,
-      image: '/window.svg'
-    },
-    {
-      id: '4',
-      title: 'QuantumLeap CRM',
-      description: 'A next-generation CRM for optimizing sales pipelines and...',
-      category: 'Functionality',
-      difficulty: 'Medium' as const,
-      participants: 12,
-      bugs: 12,
-      image: '/window.svg'
-    },
-  ]
+  // Helper function to determine difficulty based on category (consistent mapping)
+  const getDifficulty = (category: string): 'Easy' | 'Medium' | 'Hard' => {
+    const categoryDifficultyMap: Record<string, 'Easy' | 'Medium' | 'Hard'> = {
+      'web': 'Medium',
+      'mobile': 'Hard',
+      'api': 'Easy',
+      'desktop': 'Hard',
+      'functionality': 'Medium',
+      'ui': 'Easy',
+      'performance': 'Hard',
+      'security': 'Hard'
+    }
+    return categoryDifficultyMap[category.toLowerCase()] || 'Medium'
+  }
 
-  const handleViewProject = (projectId: string) => {
+  // Create project difficulty mapping (consistent for each project)
+  const projectsWithDifficulty = projects.map(project => ({
+    ...project,
+    difficulty: getDifficulty(project.category)
+  }))
+
+  // Get unique categories from actual data
+  const availableCategories = [...new Set(projects.map(p => p.category))]
+  
+  // Get unique difficulties from mapped data
+  const availableDifficulties = [...new Set(projectsWithDifficulty.map(p => p.difficulty))]
+
+  // Filter projects based on search and filters
+  const filteredProjects = projectsWithDifficulty.filter(project => {
+    const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         project.description.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = selectedCategory === 'all' || project.category.toLowerCase() === selectedCategory.toLowerCase()
+    const matchesDifficulty = selectedDifficulty === 'all' || project.difficulty.toLowerCase() === selectedDifficulty.toLowerCase()
+    
+    return matchesSearch && matchesCategory && matchesDifficulty
+  })
+
+  const handleViewProject = (projectId: number) => {
     router.push(`/tester/project-details/${projectId}?from=dashboard`)
   }
 
   // Show loader while loading
   if (isLoading) {
     return <Loader />
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className='flex-1 bg-[#FFFCFB] min-h-screen flex items-center justify-center'>
+        <div className='text-center'>
+          <div className='w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4'>
+            <svg className='w-8 h-8 text-red-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+            </svg>
+          </div>
+          <h2 className='text-xl font-semibold text-gray-900 mb-2'>Failed to Load Projects</h2>
+          <p className='text-gray-600 mb-4'>{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className='bg-[#A33C13] hover:bg-[#8a2f0f] text-white px-6 py-3 rounded-lg transition-colors'
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -105,10 +137,11 @@ function Dashboard() {
               className='w-full px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A33C13] text-[#171717] bg-white cursor-pointer hover:border-[#A33C13] transition-colors text-sm sm:text-base'
             >
               <option value='all'>Filter by Category</option>
-              <option value='functionality'>Functionality</option>
-              <option value='ui'>UI/UX</option>
-              <option value='performance'>Performance</option>
-              <option value='security'>Security</option>
+              {availableCategories.map(category => (
+                <option key={category} value={category.toLowerCase()}>
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -120,34 +153,60 @@ function Dashboard() {
               className='w-full px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A33C13] text-[#171717] bg-white cursor-pointer hover:border-[#A33C13] transition-colors text-sm sm:text-base'
             >
               <option value='all'>Filter by Difficulty</option>
-              <option value='easy'>Easy</option>
-              <option value='medium'>Medium</option>
-              <option value='hard'>Hard</option>
+              {availableDifficulties.sort().map(difficulty => (
+                <option key={difficulty} value={difficulty.toLowerCase()}>
+                  {difficulty}
+                </option>
+              ))}
             </select>
           </div>
         </div>
 
         {/* Projects Grid */}
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6'>
-          {projects.map((project, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.5 }}
-            >
-              <ProjectCard
-                title={project.title}
-                description={project.description}
-                category={project.category}
-                difficulty={project.difficulty}
-                participants={project.participants}
-                bugs={project.bugs}
-                image={project.image}
-                onView={() => handleViewProject(project.id)}
-              />
-            </motion.div>
-          ))}
+          {filteredProjects.length > 0 ? (
+            filteredProjects.map((project, index) => {
+              return (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                >
+                  <ProjectCard
+                    title={project.title}
+                    description={project.description}
+                    category={project.category}
+                    difficulty={project.difficulty}
+                    participants={Math.floor(Math.random() * 20) + 5} // Random participants for now
+                    bugs={Math.floor(Math.random() * 15)} // Random bugs for now
+                    image='/window.svg'
+                    onView={() => handleViewProject(project.id)}
+                  />
+                </motion.div>
+              )
+            })
+          ) : (
+            <div className='col-span-full flex flex-col items-center justify-center py-12'>
+              <div className='w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mb-4'>
+                <svg className='w-8 h-8 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' />
+                </svg>
+              </div>
+              <h3 className='text-lg font-semibold text-gray-900 mb-2'>
+                {searchQuery || selectedCategory !== 'all' || selectedDifficulty !== 'all' 
+                  ? 'No Projects Found' 
+                  : 'No Projects Available'
+                }
+              </h3>
+              <p className='text-gray-600 text-center'>
+                {searchQuery || selectedCategory !== 'all' || selectedDifficulty !== 'all'
+                  ? 'Try adjusting your search or filter criteria.'
+                  : 'Check back later for new testing opportunities.'
+                }
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

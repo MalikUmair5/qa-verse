@@ -78,3 +78,34 @@ export async function getProjectById(id: number): Promise<ProjectResponse> {
     throw error;
   }
 }
+
+export async function updateProject(id: number, payload: Partial<ProjectPayload>): Promise<ProjectResponse> {
+  try {
+    const response = await axiosInstance.patch<ProjectResponse>(
+      `/projects/${id}/`,
+      payload
+    );
+    
+    if (response.status !== 200) {
+      throw new Error('Failed to update project');
+    }
+    
+    return response.data;
+  } catch (error: unknown) {
+    console.error('Update project error:', error);
+    throw error;
+  }
+}
+
+export async function deleteProject(id: number): Promise<void> {
+  try {
+    const response = await axiosInstance.delete(`/projects/${id}/`);
+    
+    if (response.status !== 204 && response.status !== 200) {
+      throw new Error('Failed to delete project');
+    }
+  } catch (error: unknown) {
+    console.error('Delete project error:', error);
+    throw error;
+  }
+}

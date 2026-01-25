@@ -6,10 +6,11 @@ import { aclonica } from '@/app/layout'
 import MaintainerCreateProject from './createProject'
 import ProjectDetailPage from './ProjectDetailPage'
 import { createProject } from '@/lib/api/projects/create'
-import { getProjects, ProjectResponse } from '@/lib/api/project-owner/projects'
+import { getProjects, ProjectResponse, updateProject, deleteProject, ProjectPayload } from '@/lib/api/project-owner/projects'
 import { CreateProjectFormData } from '@/lib/schemas/project'
 import { showToast } from '@/lib/utils/toast'
 import Loader from '@/components/ui/loader'
+import ConfirmDeleteModal from '../common/modals/confirmDelete'
 
 interface ProjectCardProps {
     id: number
@@ -31,6 +32,8 @@ interface ProjectCardProps {
         linkedin_url: string
     }
     onViewDetails: (id: number) => void
+    onEdit: (project: ProjectResponse) => void
+    onDelete: (id: number, title: string) => void
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -44,6 +47,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     created_at,
     maintainer,
     onViewDetails,
+    onEdit,
+    onDelete,
 }) => {
     // Format date
     const formatDate = (dateString: string) => {
@@ -56,6 +61,25 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
     const handleViewDetails = () => {
         onViewDetails(id)
+    }
+
+    const handleEdit = () => {
+        onEdit({ 
+            id, 
+            title, 
+            description, 
+            technology_stack, 
+            category, 
+            status, 
+            testing_url, 
+            created_at, 
+            maintainer,
+            updated_at: created_at // Use created_at as fallback for updated_at
+        })
+    }
+
+    const handleDelete = () => {
+        onDelete(id, title)
     }
 
     return (
@@ -104,11 +128,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                     View Details
                 </button>
                 <button 
-                    onClick={() => window.open(testing_url, '_blank')}
-                    className="bg-gray-600 text-white py-2 px-3 rounded hover:bg-gray-700 transition-colors text-sm"
+                    onClick={handleEdit}
+                    className="bg-gray-600 text-white py-2 px-3 rounded hover:bg-blue-700 transition-colors text-sm"
                 >
-                    Test
+                    Edit
                 </button>
+                <button 
+                    onClick={handleDelete}
+                    className="bg-red-500 text-white py-2 px-3 rounded hover:bg-red-700 transition-colors text-sm"
+                >
+                    Delete
+                </button>
+
             </div>
         </motion.div>
     )
@@ -118,8 +149,13 @@ function ProjectsPage() {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(true)
     const [createLoading, setCreateLoading] = useState(false)
-    const [currentView, setCurrentView] = useState<'list' | 'create' | 'details'>('list')
+    const [updateLoading, setUpdateLoading] = useState(false)
+    const [deleteLoading, setDeleteLoading] = useState(false)
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [projectToDelete, setProjectToDelete] = useState<{id: number, title: string} | null>(null)
+    const [currentView, setCurrentView] = useState<'list' | 'create' | 'details' | 'edit'>('list')
     const [selectedProject, setSelectedProject] = useState<number | null>(null)
+    const [editingProject, setEditingProject] = useState<ProjectResponse | null>(null)
     const [projects, setProjects] = useState<ProjectResponse[]>([])
 
     // Fetch projects from API
@@ -185,10 +221,118 @@ function ProjectsPage() {
         }
     };
 
+    const handleUpdateProject = async (data: CreateProjectFormData) => {
+        if (!editingProject) return;
+        
+        setUpdateLoading(true);
+        const loadingToast = showToast.loading('Updating project...');
+
+        try {
+            const response = await updateProject(editingProject.id, data);
+
+            showToast.dismiss(loadingToast);
+            showToast.success(`Project "${response.title}" updated successfully!`);
+
+            // Update the project in the projects list
+            setProjects(prev => prev.map(p => p.id === editingProject.id ? response : p));
+            
+            // Switch back to list view
+            setCurrentView('list');
+            setEditingProject(null);
+
+        } catch (error: unknown) {
+            showToast.dismiss(loadingToast);
+
+            let errorMessage = 'Failed to update project. Please try again.';
+
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { status?: number; data?: Record<string, unknown> } };
+
+                if (axiosError.response?.status === 400) {
+                    const errorData = axiosError.response.data;
+                    if (typeof errorData === 'object' && errorData !== null) {
+                        const firstError = Object.values(errorData)[0];
+                        if (Array.isArray(firstError)) {
+                            errorMessage = firstError[0];
+                        } else if (typeof firstError === 'string') {
+                            errorMessage = firstError;
+                        }
+                    }
+                } else if (axiosError.response?.data && typeof axiosError.response.data === 'object' && 'message' in axiosError.response.data) {
+                    errorMessage = String(axiosError.response.data.message);
+                }
+            }
+
+            showToast.error(errorMessage);
+        } finally {
+            setUpdateLoading(false);
+        }
+    };
+
+    const handleDeleteProject = async (id: number, title: string) => {
+        // Set project to delete and show modal
+        setProjectToDelete({ id, title });
+        setShowDeleteModal(true);
+    };
+
+    const confirmDeleteProject = async () => {
+        if (!projectToDelete) return;
+        
+        setDeleteLoading(true);
+        const loadingToast = showToast.loading('Deleting project...');
+
+        try {
+            await deleteProject(projectToDelete.id);
+
+            showToast.dismiss(loadingToast);
+            showToast.success(`Project "${projectToDelete.title}" deleted successfully!`);
+
+            // Remove the project from the projects list
+            setProjects(prev => prev.filter(p => p.id !== projectToDelete.id));
+
+            // Close modal and reset state
+            setShowDeleteModal(false);
+            setProjectToDelete(null);
+
+        } catch (error: unknown) {
+            showToast.dismiss(loadingToast);
+
+            let errorMessage = 'Failed to delete project. Please try again.';
+
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { status?: number; data?: Record<string, unknown> } };
+
+                if (axiosError.response?.status === 404) {
+                    errorMessage = 'Project not found or already deleted.';
+                } else if (axiosError.response?.status === 403) {
+                    errorMessage = 'You do not have permission to delete this project.';
+                } else if (axiosError.response?.data && typeof axiosError.response.data === 'object' && 'message' in axiosError.response.data) {
+                    errorMessage = String(axiosError.response.data.message);
+                }
+            }
+
+            showToast.error(errorMessage);
+        } finally {
+            setDeleteLoading(false);
+        }
+    };
+
+    const handleCloseDeleteModal = () => {
+        if (!deleteLoading) {
+            setShowDeleteModal(false);
+            setProjectToDelete(null);
+        }
+    };
+
     // Show loader while loading
     if (isLoading) {
         return <Loader />
     }
+
+    const handleEdit = (project: ProjectResponse) => {
+        setEditingProject(project);
+        setCurrentView('edit');
+    };
 
     // Show create project view
     if (currentView === 'create') {
@@ -197,6 +341,29 @@ function ProjectsPage() {
                 onBack={() => setCurrentView('list')}
                 onSubmit={handleCreateProject}
                 loading={createLoading}
+            />
+        )
+    }
+
+    // Show edit project view
+    if (currentView === 'edit' && editingProject) {
+        return (
+            <MaintainerCreateProject
+                onBack={() => {
+                    setCurrentView('list')
+                    setEditingProject(null)
+                }}
+                onSubmit={handleUpdateProject}
+                loading={updateLoading}
+                initialData={{
+                    title: editingProject.title,
+                    description: editingProject.description,
+                    technology_stack: editingProject.technology_stack,
+                    testing_url: editingProject.testing_url,
+                    category: editingProject.category as 'web' | 'mobile' | 'api' | 'desktop',
+                    status: editingProject.status as 'active' | 'inactive' | 'completed'
+                }}
+                isEdit={true}
             />
         )
     }
@@ -257,6 +424,8 @@ function ProjectsPage() {
                                             setSelectedProject(id)
                                             setCurrentView('details')
                                         }}
+                                        onEdit={handleEdit}
+                                        onDelete={handleDeleteProject}
                                     />
                                 </motion.div>
                             ))}
@@ -280,6 +449,15 @@ function ProjectsPage() {
                     )}
                 </motion.div>
             </div>
+            
+            {/* Confirm Delete Modal */}
+            <ConfirmDeleteModal
+                isOpen={showDeleteModal}
+                onClose={handleCloseDeleteModal}
+                onConfirm={confirmDeleteProject}
+                projectName={projectToDelete?.title || ''}
+                loading={deleteLoading}
+            />
         </div>
     )
 }

@@ -12,9 +12,17 @@ interface MaintainerCreateProjectProps {
   onBack?: () => void;
   onSubmit: (data: CreateProjectFormData) => void;
   loading?: boolean;
+  initialData?: CreateProjectFormData;
+  isEdit?: boolean;
 }
 
-export default function MaintainerCreateProject({ onBack, onSubmit, loading = false }: MaintainerCreateProjectProps) {
+export default function MaintainerCreateProject({ 
+  onBack, 
+  onSubmit, 
+  loading = false, 
+  initialData, 
+  isEdit = false 
+}: MaintainerCreateProjectProps) {
   const router = useRouter();
 
   const {
@@ -25,7 +33,7 @@ export default function MaintainerCreateProject({ onBack, onSubmit, loading = fa
   } = useForm<CreateProjectFormData>({
     resolver: zodResolver(createProjectSchema),
     mode: 'onChange',
-    defaultValues: {
+    defaultValues: initialData || {
       title: '',
       description: '',
       technology_stack: '',
@@ -58,10 +66,13 @@ export default function MaintainerCreateProject({ onBack, onSubmit, loading = fa
             {/* Title */}
             <div className="mb-6">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#171717] mb-4">
-                Create New Project
+                {isEdit ? 'Edit Project' : 'Create New Project'}
               </h1>
               <p className="text-[#171717] text-sm sm:text-base lg:text-lg leading-relaxed">
-                Add a new project for testing and collaboration
+                {isEdit 
+                  ? 'Update your project details and settings'
+                  : 'Add a new project for testing and collaboration'
+                }
               </p>
             </div>
 
@@ -239,10 +250,10 @@ export default function MaintainerCreateProject({ onBack, onSubmit, loading = fa
                     {loading ? (
                       <>
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        <span>Creating...</span>
+                        <span>{isEdit ? 'Updating...' : 'Creating...'}</span>
                       </>
                     ) : (
-                      'Create Project'
+                      isEdit ? 'Update Project' : 'Create Project'
                     )}
                   </motion.button>
                   

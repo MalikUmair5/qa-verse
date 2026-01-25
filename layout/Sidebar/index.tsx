@@ -24,7 +24,7 @@ interface MenuItem {
 // 1. Define Role-Specific Menus
 const TESTER_MENU: MenuItem[] = [
   {
-    label: "Dashboard",
+    label: "Explore Projects",
     icon: <MdOutlineDashboard size={20} />,
     path: '/tester/dashboard'
   },
@@ -60,6 +60,11 @@ const MAINTAINER_MENU: MenuItem[] = [
     label: "Bug Reports",
     icon: <MdBugReport size={20} />,
     path: '/maintainer/bugs'
+  },
+  {
+    label: "Profile",
+    icon: <ImProfile size={20} />,
+    path: '/maintainer/profile'
   },
   {
     label: "Settings",
