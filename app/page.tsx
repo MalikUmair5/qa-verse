@@ -1,8 +1,8 @@
 'use client'
 import Image from "next/image";
-import Header from "@/components/common/header";
-import Footer from "@/components/common/footer";
-import TypewriterText from "@/components/common/TypewriterText";
+import Header from "@/layout/header";
+import Footer from "@/layout/footer";
+import TypewriterText from "@/layout/TypewriterText";
 import Loader from "@/components/ui/loader";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";

@@ -1,120 +1,80 @@
 'use client'
-import Header from "@/components/common/header";
-import Sidebar from "@/components/common/Sidebar";
+import Header from "@/layout/header";
+import Sidebar from "@/layout/Sidebar";
 import Loader from "@/components/ui/loader";
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+// Import from the new file
+import { SidebarProvider, useSidebar } from "@/app/context/SidebarContext";
+import { createContext, useContext, useState, ReactNode } from "react";
 
-// Create a loading context
-interface LoadingContextType {
-  isLoading: boolean;
-  setIsLoading: (loading: boolean) => void;
-  loadProjects: () => Promise<void>;
-}
+// ... (Remove the old SidebarContext/Provider code from this file) ...
+
+// --- Loading Context ---
+
+interface LoadingContextType { isLoading: boolean; setIsLoading: (loading: boolean) => void; }
 
 const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
-// Create sidebar context
-interface SidebarContextType {
-  isExpanded: boolean;
-  toggleSidebar: () => void;
+interface LoadingContextType {
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
 }
 
-const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
-
-// Custom hook to use loading context
 export const useLoading = () => {
   const context = useContext(LoadingContext);
-  if (!context) {
-    throw new Error('useLoading must be used within a LoadingProvider');
-  }
+  if (!context) throw new Error('useLoading error');
   return context;
 };
 
-// Custom hook to use sidebar context
-export const useSidebar = () => {
-  const context = useContext(SidebarContext);
-  if (!context) {
-    throw new Error('useSidebar must be used within a SidebarProvider');
-  }
-  return context;
-};
-
-// Loading Provider component
 const LoadingProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
-
-  // Simulate project loading function
-  const loadProjects = async () => {
-    setIsLoading(true);
-    try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Here you would typically fetch projects from your API
-      console.log('Projects loaded successfully');
-    } catch (error) {
-      console.error('Failed to load projects:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const value = {
-    isLoading,
-    setIsLoading,
-    loadProjects
-  };
-
   return (
-    <LoadingContext.Provider value={value}>
+    <LoadingContext.Provider value={{ isLoading, setIsLoading }}>
       {children}
     </LoadingContext.Provider>
   );
 };
 
-// Sidebar Provider component
-const SidebarProvider = ({ children }: { children: ReactNode }) => {
-  const [isExpanded, setIsExpanded] = useState(false); // Default closed on mobile
 
-  // Set initial state based on screen size
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) { // lg breakpoint
-        setIsExpanded(true);
-      } else {
-        setIsExpanded(false);
-      }
-    };
 
-    // Set initial state
-    handleResize();
 
-    // Listen for resize events
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const toggleSidebar = () => {
-    setIsExpanded(prev => !prev);
-  };
-
-  const value = {
-    isExpanded,
-    toggleSidebar
-  };
-
+// Layout Content
+const LayoutContent = ({ children }: { children: ReactNode }) => {
+  const { isLoading } = useLoading(); // Get global loading state
+  const { isExpanded, toggleSidebar } = useSidebar();
   return (
-    <SidebarContext.Provider value={value}>
-      {children}
-    </SidebarContext.Provider>
+    <>
+      <Sidebar />
+      <Header
+        authenticated={true}
+        hasSidebar={true}
+        toggleSidebar={toggleSidebar}
+        isExpanded={isExpanded}
+      />
+
+      <div className="flex">
+        {/* The main content wrapper that respects sidebar width */}
+        <div className={`
+          flex-1 transition-all duration-300 pt-20
+          ${isExpanded ? 'lg:ml-64' : 'lg:ml-20'} 
+        `}>
+          <main className="min-h-screen bg-[#FFFCFB]">
+            {/* LOGIC: If loading, show Loader component. 
+               Otherwise, show the page content (children).
+               Since this is inside the flex-1 div, it won't overlap the sidebar.
+            */}
+            {isLoading ? (
+              <Loader />
+            ) : (
+              children
+            )}
+          </main>
+        </div>
+      </div>
+    </>
   );
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <LoadingProvider>
       <SidebarProvider>
@@ -123,35 +83,3 @@ export default function RootLayout({
     </LoadingProvider>
   );
 }
-
-// Separate component to use the loading context
-const LayoutContent = ({ children }: { children: ReactNode }) => {
-  const { isLoading } = useLoading();
-  const { isExpanded, toggleSidebar } = useSidebar();
-
-  return (
-    <>
-      <Sidebar />
-      <Header authenticated={true} hasSidebar={true} toggleSidebar={toggleSidebar} isExpanded={isExpanded} />
-      <div className="flex">
-        {/* Main content area with dynamic left margin based on sidebar state */}
-        <div className={`
-          flex-1 transition-all duration-300 pt-20
-          ${isExpanded ? 'lg:ml-80' : 'lg:ml-20'}
-        `}>
-          <main className="min-h-screen">
-            {isLoading && (
-              <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
-                <div className="bg-white rounded-2xl shadow-2xl p-8">
-                  <Loader />
-                  <p className="text-center mt-4 text-muted font-medium">Loading projects...</p>
-                </div>
-              </div>
-            )}
-            {children}
-          </main>
-        </div>
-      </div>
-    </>
-  );
-};

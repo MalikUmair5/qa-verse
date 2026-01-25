@@ -29,12 +29,7 @@ export const logout = () => {
                 primary: '#22c55e',
                 secondary: '#ffffff',
             },
-        });
-
-        // Use window.location for complete page refresh (better for security)
-        setTimeout(() => {
-            window.location.href = '/signin';
-        }, 1000);
+        });        
 
     } catch (error) {
         // Dismiss loading toast
