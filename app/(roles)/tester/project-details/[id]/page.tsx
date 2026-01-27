@@ -2,15 +2,17 @@ import React from 'react'
 import ProjectDetailPage from '@/components/roles/tester/ProjectDetailPage'
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-function Page({ params }: PageProps) {
+async function Page({ params }: PageProps) {
+  const { id } = await params
+  
   return (
     <>
-      <ProjectDetailPage projectId={params.id} />
+      <ProjectDetailPage projectId={id} />
     </>
   )
 }

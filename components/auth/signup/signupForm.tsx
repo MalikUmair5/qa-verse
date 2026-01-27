@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ThemeButton from "@/components/ui/button";
 import { register, RegisterPayload } from "@/lib/api/auth/register";
-import toast from "react-hot-toast";
+import { showToast } from "@/lib/utils/toast";
 import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
@@ -45,25 +45,13 @@ export default function SignupForm({ role }: SignupFormProps) {
     if (file) {
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        toast.error('Please select an image file', {
-          style: {
-            background: '#4a1f1f',
-            color: '#ffffff',
-            border: '1px solid #ef4444',
-          },
-        });
+        showToast.error('Please select an image file');
         return;
       }
       
       // Validate file size (2MB max)
       if (file.size > 2 * 1024 * 1024) {
-        toast.error('Image size must be less than 2MB', {
-          style: {
-            background: '#4a1f1f',
-            color: '#ffffff',
-            border: '1px solid #ef4444',
-          },
-        });
+        showToast.error('Image size must be less than 2MB');
         return;
       }
       
@@ -81,13 +69,7 @@ export default function SignupForm({ role }: SignupFormProps) {
   const onSubmit = async (data: SignupFormData) => {
     setLoading(true);
     
-    const loadingToast = toast.loading('Creating your account...', {
-      style: {
-        background: '#2d1810',
-        color: '#ffffff',
-        border: '1px solid #A33C13',
-      },
-    });
+    const loadingToast = showToast.loading('Creating your account...');
 
     try {
       const payload: RegisterPayload = {
@@ -104,21 +86,8 @@ export default function SignupForm({ role }: SignupFormProps) {
 
       const response = await register(payload);
       
-      toast.dismiss(loadingToast);
-      
-      // Show the success message from the API response
-      toast.success(response.message, {
-        duration: 4000,
-        style: {
-          background: '#1f4a2d',
-          color: '#ffffff',
-          border: '1px solid #22c55e',
-        },
-        iconTheme: {
-          primary: '#22c55e',
-          secondary: '#ffffff',
-        },
-      });
+      showToast.dismiss(loadingToast);
+      showToast.success(response.message);
 
       // Reset form
       reset();
@@ -131,7 +100,7 @@ export default function SignupForm({ role }: SignupFormProps) {
       }, 2000);
       
     } catch (error: unknown) {
-      toast.dismiss(loadingToast);
+      showToast.dismiss(loadingToast);
       
       let errorMessage = 'Registration failed. Please try again.';
       
@@ -154,18 +123,7 @@ export default function SignupForm({ role }: SignupFormProps) {
         }
       }
 
-      toast.error(errorMessage, {
-        duration: 5000,
-        style: {
-          background: '#4a1f1f',
-          color: '#ffffff',
-          border: '1px solid #ef4444',
-        },
-        iconTheme: {
-          primary: '#ef4444',
-          secondary: '#ffffff',
-        },
-      });
+      showToast.error(errorMessage);
     } finally {
       setLoading(false);
     }

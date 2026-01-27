@@ -1,69 +1,116 @@
 'use client'
-import React, { useEffect, Suspense } from 'react'
+import React, { useEffect, Suspense, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
-import { MdOutlineDashboard } from "react-icons/md";
+import { MdBugReport, MdOutlineDashboard } from "react-icons/md";
 import { ImProfile } from "react-icons/im";
-import { RiTrophyLine } from "react-icons/ri";
+import { RiGitMergeLine, RiTrophyLine } from "react-icons/ri";
 import { CgProfile } from "react-icons/cg";
-import { IoIosLogOut } from "react-icons/io";
+import { IoIosLogOut, IoMdSettings } from "react-icons/io";
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation'
-import { useSidebar } from '@/app/(roles)/layout'
+import { useSidebar } from '@/app/context/SidebarContext';
 import logout from '@/lib/api/auth/logout';
-
-
+import { useAuthStore } from '@/store/authStore';
+import { useRouter } from 'next/navigation';
+import { useLoading } from '@/app/(roles)/layout'; // or wherever LoadingContext is defined
 
 interface MenuItem {
-  label: "Dashboard" | "My Projects" | "Leaderboard" | "Profile";
-  isActive: boolean;
+  label: string;
   icon: React.ReactNode;
   path: string;
 }
 
-
-const menuItems: MenuItem[] = [
+// 1. Define Role-Specific Menus
+const TESTER_MENU: MenuItem[] = [
   {
-    label: "Dashboard",
-    isActive: true,
+    label: "Explore Projects",
     icon: <MdOutlineDashboard size={20} />,
-    path: '/tester/Dashboard'
+    path: '/tester/dashboard'
   },
   {
     label: "My Projects",
-    isActive: false,
     icon: <RiTrophyLine size={20} />,
     path: '/tester/projects'
   },
   {
     label: "Leaderboard",
-    isActive: false,
     icon: <CgProfile size={20} />,
     path: '/tester/leader-board'
   },
   {
     label: "Profile",
-    isActive: false,
     icon: <ImProfile size={20} />,
     path: '/tester/profile'
   }
 ]
 
-
+const MAINTAINER_MENU: MenuItem[] = [
+  {
+    label: "Dashboard",
+    icon: <MdOutlineDashboard size={20} />,
+    path: '/maintainer/dashboard'
+  },
+  {
+    label: "Project Management",
+    icon: <RiGitMergeLine size={20} />,
+    path: '/maintainer/projects'
+  },
+  {
+    label: "Bug Reports",
+    icon: <MdBugReport size={20} />,
+    path: '/maintainer/bugs'
+  },
+  {
+    label: "Profile",
+    icon: <ImProfile size={20} />,
+    path: '/maintainer/profile'
+  },
+  {
+    label: "Settings",
+    icon: <IoMdSettings size={20} />,
+    path: '/maintainer/settings'
+  }
+]
 function SidebarContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { isExpanded, toggleSidebar } = useSidebar();
+  const role = useAuthStore().user?.role
+  const [mounted, setMounted] = useState(false);
+  const { setIsLoading } = useLoading(); // Get the global loader control
+  const router = useRouter();
 
-  // Get query parameter to check where user came from
+  //    FIX: Destructure closeSidebar from the context
+  const { isExpanded, toggleSidebar, closeSidebar } = useSidebar();
+
   const fromParam = searchParams.get('from');
 
-  // Close sidebar on navigation (mobile only)
+
+
+  // 3. Set mounted to true ONLY after the first render (client-side)
   useEffect(() => {
-    if (isExpanded && window.innerWidth < 1024) {
-      toggleSidebar();
+    setMounted(true);
+  }, []);
+
+  // 4. Calculate menu items based on mounted state
+  let currentMenuItems: MenuItem[] = [];
+
+  if (mounted && role) {
+    // Only run this logic if we are safely in the browser
+    if (role === 'tester') {
+      currentMenuItems = TESTER_MENU;
+    } else if (role === 'maintainer') {
+      currentMenuItems = MAINTAINER_MENU;
     }
-  }, [pathname, isExpanded, toggleSidebar]);
+  }
+
+  //    FIX: Close sidebar ONLY when the path changes.
+  // We removed 'isExpanded' from the dependency array to stop the open/close loop.
+  useEffect(() => {
+    if (window.innerWidth < 1024) {
+      closeSidebar();
+    }
+  }, [pathname, closeSidebar]);
 
   // Prevent body scroll when sidebar is open on mobile
   useEffect(() => {
@@ -72,103 +119,73 @@ function SidebarContent() {
     } else {
       document.body.style.overflow = 'unset';
     }
-
-    // Cleanup on unmount
     return () => {
       document.body.style.overflow = 'unset';
     };
   }, [isExpanded]);
 
-  // Debug logging
-  useEffect(() => {
-    if (pathname.startsWith('/tester/project-details/')) {
-      console.log('🔍 Debug - Current pathname:', pathname);
-      console.log('🔍 Debug - fromParam:', fromParam);
-    }
-  }, [pathname, fromParam]);
+  const handleLogout = () => {
+    try {
+      setIsLoading(true); 
+      logout();
+      router.push('/signin');
 
-  // Function to check if current path is active
+    } catch (error) {
+      console.error('Logout failed:', error);
+      setIsLoading(false); // Hide loader if something breaks
+    }
+  };
+
   const isActivePath = (itemPath: string) => {
-    // Direct match
     if (pathname === itemPath) return true;
-    
-    // Check if it's a child route (but not project-details or report-bug which are handled separately)
-    if (!pathname.startsWith('/tester/project-details/') && 
-        !pathname.startsWith('/tester/report-bug') && 
-        pathname.startsWith(itemPath + '/')) {
+
+    if (!pathname.startsWith('/tester/project-details/') &&
+      !pathname.startsWith('/tester/report-bug') &&
+      pathname.startsWith(itemPath + '/')) {
       return true;
     }
-    
-    // Special handling for project details - keep parent active based on origin
+
     if (pathname.startsWith('/tester/project-details/')) {
-      // IMPORTANT: Check My Projects FIRST before Dashboard
-      if (itemPath === '/tester/projects' && fromParam === 'projects') {
-        console.log('✅ Activating My Projects');
-        return true;
-      }
-      // Only activate Dashboard if explicitly from dashboard
-      if (itemPath === '/tester/Dashboard' && fromParam === 'dashboard') {
-        console.log('✅ Activating Dashboard');
-        return true;
-      }
-      // No default activation - return false if no match
+      if (itemPath === '/tester/projects' && fromParam === 'projects') return true;
+      if (itemPath === '/tester/dashboard' && fromParam === 'dashboard') return true;
     }
-    
-    // Special handling for report-bug - keep parent active based on origin
+
     if (pathname.startsWith('/tester/report-bug')) {
-      // Activate My Projects if coming from projects page
-      if (itemPath === '/tester/projects' && fromParam === 'projects') {
-        console.log('✅ Activating My Projects (from report-bug)');
-        return true;
-      }
-      // Activate Dashboard if coming from dashboard
-      if (itemPath === '/tester/Dashboard' && fromParam === 'dashboard') {
-        console.log('✅ Activating Dashboard (from report-bug)');
-        return true;
-      }
+      if (itemPath === '/tester/projects' && fromParam === 'projects') return true;
+      if (itemPath === '/tester/dashboard' && fromParam === 'dashboard') return true;
     }
-    
+
     return false;
   };
 
-  // Handle logout
-  // const handleLogout = async () => {
-  //   try {
-  //     console.log('Logging out...');
-  //     router.push('/signin');
-  //   } catch (error) {
-  //     console.error('Logout error:', error);
-  //   }
-  // };
-
   return (
     <>
-      {/* Backdrop for mobile - click to close sidebar */}
+      {/* Mobile Backdrop */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
-            className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={toggleSidebar}
+            onClick={closeSidebar} //    Use explicit close action
           />
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
+      {/* Sidebar Container */}
       <motion.aside
         className={`
           fixed left-0 top-0 bg-[#F3ECE9] flex flex-col shadow-lg h-screen
           transition-all duration-300
           ${isExpanded ? 'z-50' : 'z-30'}
           ${isExpanded ? 'w-80 translate-x-0' : 'w-80 -translate-x-full'}
-          ${isExpanded ? 'lg:w-80 lg:translate-x-0' : 'lg:w-20 lg:translate-x-0'}
+          ${isExpanded ? 'lg:w-64 lg:translate-x-0' : 'lg:w-20 lg:translate-x-0'} 
           lg:z-30
         `}
         initial={false}
       >
-        {/* Logo Section - Always show logo, hide text when collapsed */}
+        {/* Header / Logo */}
         <motion.div
           className={`p-6 border-b border-gray-200/50 ${!isExpanded ? 'flex justify-center' : 'flex items-center justify-between'}`}
           initial={{ opacity: 0, y: -20 }}
@@ -202,16 +219,13 @@ function SidebarContent() {
             </AnimatePresence>
           </motion.div>
 
-          {/* Close button for mobile */}
+          {/* Mobile Close Button */}
           {isExpanded && (
             <motion.button
-              onClick={toggleSidebar}
+              onClick={closeSidebar} //    Use explicit close action
               className="lg:hidden flex items-center justify-center w-8 h-8 rounded-lg hover:bg-white/50 transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
             >
               <svg className="w-5 h-5 text-[#A33C13]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -220,9 +234,9 @@ function SidebarContent() {
           )}
         </motion.div>
 
-        {/* Navigation Menu */}
+        {/* Menu Items */}
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          {menuItems.map((item) => (
+          {currentMenuItems.map((item) => (
             <Link href={item.path} key={item.label}>
               <motion.div
                 className={`
@@ -256,10 +270,10 @@ function SidebarContent() {
           ))}
         </nav>
 
-        {/* Log Out Button */}
+        {/* Logout Button */}
         <div className="p-4 border-t border-gray-200/50">
           <motion.button
-            onClick={logout}
+            onClick={handleLogout}
             className={`
               w-full flex items-center px-3 py-3 rounded-xl transition-all duration-300
               bg-[#A33C13] text-white hover:bg-[#8a3010] shadow-md
@@ -290,7 +304,6 @@ function SidebarContent() {
   )
 }
 
-// Main Sidebar component with Suspense boundary
 function Sidebar() {
   return (
     <Suspense fallback={<div className="w-20 h-screen bg-[#F3ECE9] fixed left-0 top-0" />}>

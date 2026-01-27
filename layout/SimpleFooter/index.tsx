@@ -1,15 +1,13 @@
 'use client'
 import React from 'react'
 import { motion } from 'framer-motion'
-import { useSidebar } from '@/app/(roles)/layout'
 
 function SimpleFooter() {
-  const { isExpanded } = useSidebar();
 
   return (
     <motion.footer 
       className={`bg-[#F3ECE9] border-t border-gray-200 transition-all duration-300 ${
-        isExpanded ? 'ml-80' : 'ml-20'
+        true ? 'ml-80' : 'ml-20'
       }`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}

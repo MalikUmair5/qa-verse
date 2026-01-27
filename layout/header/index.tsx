@@ -20,7 +20,7 @@ function Header({ authenticated, hasSidebar = false, toggleSidebar, isExpanded =
       className={`
         fixed top-0 bg-secondary border-b border-gray-200 shadow-sm bg-[#F3ECE9] z-40 
         transition-all duration-300
-        ${hasSidebar && isExpanded ? 'left-0 lg:left-80' : hasSidebar ? 'left-0 lg:left-20' : 'left-0'}
+        ${hasSidebar && isExpanded ? 'left-0 lg:left-64' : hasSidebar ? 'left-0 lg:left-20' : 'left-0'}
         right-0
       `}
       initial={{ y: -100, opacity: 0 }}
