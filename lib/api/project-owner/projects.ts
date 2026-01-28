@@ -75,6 +75,21 @@ export async function getProjects(): Promise<ProjectResponse> {
   }
 }
 
+export async function getMaintainedProjects(): Promise<ProjectInterface[]> {
+  try {
+    const response = await axiosInstance.get<ProjectInterface[]>('/projects/maintained/');
+    
+    if (response.status !== 200) {
+      throw new Error('Failed to fetch maintained projects');
+    }
+    
+    return response.data;
+  } catch (error: unknown) {
+    console.error('Get maintained projects error:', error);
+    throw error;
+  }
+}
+
 export async function getProjectById(id: string): Promise<ProjectInterface> {
   try {
     const response = await axiosInstance.get<ProjectInterface>(`/projects/${id}/`);

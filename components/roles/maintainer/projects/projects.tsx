@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getProjects, ProjectInterface, deleteProject } from '@/lib/api/project-owner/projects'
+import { getMaintainedProjects, ProjectInterface, deleteProject } from '@/lib/api/project-owner/projects'
 import { showToast } from '@/lib/utils/toast'
 import Loader from '@/components/ui/loader'
 import ConfirmDeleteModal from '../../common/modals/confirmDelete'
@@ -37,10 +37,10 @@ function ProjectsPage() {
         const fetchProjects = async () => {
             try {
                 setIsLoading(true)
-                const response = await getProjects()
-                setProjects(response.results || [])
+                const response = await getMaintainedProjects()
+                setProjects(response || [])
             } catch (error) {
-                console.error('Error fetching projects:', error)
+                console.error('Error fetching maintained projects:', error)
                 showToast.error('Failed to load projects')
             } finally {
                 setIsLoading(false)
