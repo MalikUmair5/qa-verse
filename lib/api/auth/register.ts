@@ -3,7 +3,7 @@ import axiosInstance from "../axiosInstance";
 export interface RegisterPayload {
     fullname: string;
     email: string;
-    role: "tester" | "project_owner";
+    role: "tester" | "maintainer";
     password: string;
     password2: string;
     avatar?: File | null;

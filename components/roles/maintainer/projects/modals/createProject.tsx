@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FiArrowLeft } from 'react-icons/fi';
+import { FiArrowLeft, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { createProjectSchema, CreateProjectFormData } from '@/lib/schemas/project';
 import { useRouter } from 'next/navigation';
 
@@ -29,19 +29,26 @@ export default function MaintainerCreateProject({
     register,
     handleSubmit,
     formState: { errors, isValid, dirtyFields },
-    reset
+    reset,
+    control
   } = useForm<CreateProjectFormData>({
     resolver: zodResolver(createProjectSchema),
     mode: 'onChange',
     defaultValues: initialData || {
       title: '',
       description: '',
+      instructions: [''],
       technology_stack: '',
       testing_url: '',
       category: 'web',
       status: 'active'
     }
   });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'instructions'
+  } as any);
 
   const handleFormSubmit = (data: CreateProjectFormData) => {
     onSubmit(data);
@@ -127,6 +134,52 @@ export default function MaintainerCreateProject({
                       className="text-red-500 text-sm mt-1"
                     >
                       {errors.description.message}
+                    </motion.p>
+                  )}
+                </div>
+
+                {/* Instructions */}
+                <div>
+                  <label className="block text-[#171717] font-medium mb-2">Testing Instructions *</label>
+                  <div className="space-y-2">
+                    {fields.map((field, index) => (
+                      <div key={field.id} className="flex gap-2">
+                        <input
+                          {...register(`instructions.${index}` as const)}
+                          placeholder={`Instruction ${index + 1}`}
+                          className={`flex-1 p-3 bg-[#F5F5F5] border-2 rounded-lg outline-none transition-colors ${
+                            errors.instructions?.[index] 
+                              ? 'border-red-500 focus:border-red-400' 
+                              : 'border-gray-300 focus:border-[#A33C13]'
+                          } text-[#171717] placeholder-gray-500`}
+                        />
+                        {fields.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => remove(index)}
+                            className="p-3 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <FiTrash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => append('')}
+                      className="flex items-center gap-2 text-[#A33C13] hover:text-[#8a2f0f] transition-colors text-sm"
+                    >
+                      <FiPlus size={16} />
+                      Add Instruction
+                    </button>
+                  </div>
+                  {errors.instructions && (
+                    <motion.p 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-red-500 text-sm mt-1"
+                    >
+                      {errors.instructions.message || errors.instructions.root?.message}
                     </motion.p>
                   )}
                 </div>

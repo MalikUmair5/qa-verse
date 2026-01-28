@@ -1,5 +1,5 @@
 import React from 'react'
-import ProjectDetailPage from '@/components/roles/tester/ProjectDetailPage'
+import ProjectDetailPage from '@/components/shared/ProjectDetailsPage'
 
 interface PageProps {
   params: {

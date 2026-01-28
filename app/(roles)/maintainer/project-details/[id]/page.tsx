@@ -9,7 +9,7 @@ interface PageProps {
 
 async function Page({ params }: PageProps) {
   const { id } = await params
-  
+
   return (
     <>
       <ProjectDetailsPage projectId={id} />

@@ -5,16 +5,15 @@ import { motion } from 'framer-motion'
 import { FiSearch } from 'react-icons/fi'
 import { useRouter } from 'next/navigation'
 import Loader from '@/components/ui/loader'
-import { getProjects, ProjectResponse } from '@/lib/api/project-owner/projects'
+import { getProjects, ProjectInterface } from '@/lib/api/project-owner/projects'
 import { showToast } from '@/lib/utils/toast'
 
 function Dashboard() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [selectedDifficulty, setSelectedDifficulty] = useState('all')
   const [isLoading, setIsLoading] = useState(true)
-  const [projects, setProjects] = useState<ProjectResponse[]>([])
+  const [projects, setProjects] = useState<ProjectInterface[]>([])
   const [error, setError] = useState<string | null>(null)
 
   // Fetch projects from API
@@ -23,8 +22,8 @@ function Dashboard() {
       try {
         setIsLoading(true)
         setError(null)
-        const data = await getProjects()
-        setProjects(data)
+        const response = await getProjects()
+        setProjects(response.results || [])
       } catch (error) {
         console.error('Error fetching projects:', error)
         setError('Failed to load projects. Please try again later.')
@@ -37,44 +36,19 @@ function Dashboard() {
     fetchProjects()
   }, [])
 
-  // Helper function to determine difficulty based on category (consistent mapping)
-  const getDifficulty = (category: string): 'Easy' | 'Medium' | 'Hard' => {
-    const categoryDifficultyMap: Record<string, 'Easy' | 'Medium' | 'Hard'> = {
-      'web': 'Medium',
-      'mobile': 'Hard',
-      'api': 'Easy',
-      'desktop': 'Hard',
-      'functionality': 'Medium',
-      'ui': 'Easy',
-      'performance': 'Hard',
-      'security': 'Hard'
-    }
-    return categoryDifficultyMap[category.toLowerCase()] || 'Medium'
-  }
-
-  // Create project difficulty mapping (consistent for each project)
-  const projectsWithDifficulty = projects.map(project => ({
-    ...project,
-    difficulty: getDifficulty(project.category)
-  }))
-
   // Get unique categories from actual data
   const availableCategories = [...new Set(projects.map(p => p.category))]
-  
-  // Get unique difficulties from mapped data
-  const availableDifficulties = [...new Set(projectsWithDifficulty.map(p => p.difficulty))]
 
   // Filter projects based on search and filters
-  const filteredProjects = projectsWithDifficulty.filter(project => {
+  const filteredProjects = projects.filter(project => {
     const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          project.description.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = selectedCategory === 'all' || project.category.toLowerCase() === selectedCategory.toLowerCase()
-    const matchesDifficulty = selectedDifficulty === 'all' || project.difficulty.toLowerCase() === selectedDifficulty.toLowerCase()
     
-    return matchesSearch && matchesCategory && matchesDifficulty
+    return matchesSearch && matchesCategory
   })
 
-  const handleViewProject = (projectId: number) => {
+  const handleViewProject = (projectId: string) => {
     router.push(`/tester/project-details/${projectId}?from=dashboard`)
   }
 
@@ -116,9 +90,9 @@ function Dashboard() {
         </div>
 
         {/* Search and Filters */}
-        <div className='grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 mb-6'>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-6'>
           {/* Search Bar */}
-          <div className='md:col-span-6 relative'>
+          <div className='relative'>
             <FiSearch className='absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-[#9C9AA5] text-lg sm:text-xl' />
             <input
               type='text'
@@ -130,32 +104,16 @@ function Dashboard() {
           </div>
 
           {/* Filter by Category */}
-          <div className='md:col-span-3'>
+          <div>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className='w-full px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A33C13] text-[#171717] bg-white cursor-pointer hover:border-[#A33C13] transition-colors text-sm sm:text-base'
             >
-              <option value='all'>Filter by Category</option>
+              <option value='all'>All Categories</option>
               {availableCategories.map(category => (
                 <option key={category} value={category.toLowerCase()}>
                   {category.charAt(0).toUpperCase() + category.slice(1)}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Filter by Difficulty */}
-          <div className='md:col-span-3'>
-            <select
-              value={selectedDifficulty}
-              onChange={(e) => setSelectedDifficulty(e.target.value)}
-              className='w-full px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A33C13] text-[#171717] bg-white cursor-pointer hover:border-[#A33C13] transition-colors text-sm sm:text-base'
-            >
-              <option value='all'>Filter by Difficulty</option>
-              {availableDifficulties.sort().map(difficulty => (
-                <option key={difficulty} value={difficulty.toLowerCase()}>
-                  {difficulty}
                 </option>
               ))}
             </select>
@@ -165,27 +123,25 @@ function Dashboard() {
         {/* Projects Grid */}
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6'>
           {filteredProjects.length > 0 ? (
-            filteredProjects.map((project, index) => {
-              return (
-                <motion.div
-                  key={project.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                >
-                  <ProjectCard
-                    title={project.title}
-                    description={project.description}
-                    category={project.category}
-                    difficulty={project.difficulty}
-                    participants={Math.floor(Math.random() * 20) + 5} // Random participants for now
-                    bugs={Math.floor(Math.random() * 15)} // Random bugs for now
-                    image='/window.svg'
-                    onView={() => handleViewProject(project.id)}
-                  />
-                </motion.div>
-              )
-            })
+            filteredProjects.map((project, index) => (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+              >
+                <ProjectCard
+                  title={project.title}
+                  description={project.description}
+                  category={project.category}
+                  difficulty="Medium" // Simplified - all projects have same difficulty
+                  participants={Math.floor(Math.random() * 20) + 5}
+                  bugs={Math.floor(Math.random() * 15)}
+                  image='/window.svg'
+                  onView={() => handleViewProject(project.id)}
+                />
+              </motion.div>
+            ))
           ) : (
             <div className='col-span-full flex flex-col items-center justify-center py-12'>
               <div className='w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mb-4'>
@@ -194,13 +150,13 @@ function Dashboard() {
                 </svg>
               </div>
               <h3 className='text-lg font-semibold text-gray-900 mb-2'>
-                {searchQuery || selectedCategory !== 'all' || selectedDifficulty !== 'all' 
+                {searchQuery || selectedCategory !== 'all' 
                   ? 'No Projects Found' 
                   : 'No Projects Available'
                 }
               </h3>
               <p className='text-gray-600 text-center'>
-                {searchQuery || selectedCategory !== 'all' || selectedDifficulty !== 'all'
+                {searchQuery || selectedCategory !== 'all'
                   ? 'Try adjusting your search or filter criteria.'
                   : 'Check back later for new testing opportunities.'
                 }

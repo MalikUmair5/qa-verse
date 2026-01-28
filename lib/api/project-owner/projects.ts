@@ -3,26 +3,30 @@ import axiosInstance from '../axiosInstance';
 export interface ProjectPayload {
   title: string;
   description: string;
+  instructions: string[];
   technology_stack: string;
   testing_url: string;
   category: 'web' | 'mobile' | 'api' | 'desktop';
   status: 'active' | 'inactive' | 'completed';
 }
 
-export interface ProjectResponse {
-  id: number;
+
+
+export interface ProjectInterface {
+  id: string;
   maintainer: {
-    id: number;
+    id: string;
     email: string;
     fullname: string;
     role: string;
-    bio: string;
-    avatar: string | null;
-    github_url: string;
-    linkedin_url: string;
+    bio: string | null;
+    avatar_url: string | null;
+    github_url: string | null;
+    linkedin_url: string | null;
   };
   title: string;
   description: string;
+  instructions: string[];
   technology_stack: string;
   testing_url: string;
   category: string;
@@ -31,9 +35,16 @@ export interface ProjectResponse {
   updated_at: string;
 }
 
-export async function createProject(payload: ProjectPayload): Promise<ProjectResponse> {
+export interface ProjectResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: ProjectInterface[];
+}
+
+export async function createProject(payload: ProjectPayload): Promise<ProjectInterface> {
   try {
-    const response = await axiosInstance.post<ProjectResponse>(
+    const response = await axiosInstance.post<ProjectInterface>(
       '/projects/',
       payload
     );
@@ -49,9 +60,9 @@ export async function createProject(payload: ProjectPayload): Promise<ProjectRes
   }
 }
 
-export async function getProjects(): Promise<ProjectResponse[]> {
+export async function getProjects(): Promise<ProjectResponse> {
   try {
-    const response = await axiosInstance.get<ProjectResponse[]>('/projects/');
+    const response = await axiosInstance.get<ProjectResponse>('/projects/');
     
     if (response.status !== 200) {
       throw new Error('Failed to fetch projects');
@@ -64,9 +75,9 @@ export async function getProjects(): Promise<ProjectResponse[]> {
   }
 }
 
-export async function getProjectById(id: number): Promise<ProjectResponse> {
+export async function getProjectById(id: string): Promise<ProjectInterface> {
   try {
-    const response = await axiosInstance.get<ProjectResponse>(`/projects/${id}/`);
+    const response = await axiosInstance.get<ProjectInterface>(`/projects/${id}/`);
     
     if (response.status !== 200) {
       throw new Error('Failed to fetch project');
@@ -79,9 +90,12 @@ export async function getProjectById(id: number): Promise<ProjectResponse> {
   }
 }
 
-export async function updateProject(id: number, payload: Partial<ProjectPayload>): Promise<ProjectResponse> {
+// Alias for consistency with usage in components
+export const getProject = getProjectById;
+
+export async function updateProject(id: string, payload: Partial<ProjectPayload>): Promise<ProjectInterface> {
   try {
-    const response = await axiosInstance.patch<ProjectResponse>(
+    const response = await axiosInstance.patch<ProjectInterface>(
       `/projects/${id}/`,
       payload
     );
@@ -97,7 +111,7 @@ export async function updateProject(id: number, payload: Partial<ProjectPayload>
   }
 }
 
-export async function deleteProject(id: number): Promise<void> {
+export async function deleteProject(id: string): Promise<void> {
   try {
     const response = await axiosInstance.delete(`/projects/${id}/`);
     

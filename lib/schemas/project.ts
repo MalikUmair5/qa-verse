@@ -9,6 +9,10 @@ export const createProjectSchema = z.object({
     .min(10, 'Description must be at least 10 characters')
     .max(1000, 'Description must be less than 1000 characters'),
   
+  instructions: z.array(z.string().min(1, 'Instruction cannot be empty'))
+    .min(1, 'At least one instruction is required')
+    .max(10, 'Maximum 10 instructions allowed'),
+  
   technology_stack: z.string()
     .min(3, 'Technology stack is required')
     .max(200, 'Technology stack must be less than 200 characters'),
