@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { aclonica } from '@/app/layout'
 import MaintainerCreateProject from './createProject'
@@ -11,6 +11,7 @@ import { CreateProjectFormData } from '@/lib/schemas/project'
 import { showToast } from '@/lib/utils/toast'
 import Loader from '@/components/ui/loader'
 import ConfirmDeleteModal from '../common/modals/confirmDelete'
+import { FiArrowRight, FiCalendar, FiCode, FiEdit2, FiLayers, FiTrash2, FiUser } from 'react-icons/fi'
 
 interface ProjectCardProps {
     id: number
@@ -58,21 +59,28 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             day: 'numeric'
         })
     }
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'active': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+            case 'inactive': return 'bg-amber-100 text-amber-700 border-amber-200';
+            default: return 'bg-slate-100 text-slate-700 border-slate-200';
+        }
+    };
 
     const handleViewDetails = () => {
         onViewDetails(id)
     }
 
     const handleEdit = () => {
-        onEdit({ 
-            id, 
-            title, 
-            description, 
-            technology_stack, 
-            category, 
-            status, 
-            testing_url, 
-            created_at, 
+        onEdit({
+            id,
+            title,
+            description,
+            technology_stack,
+            category,
+            status,
+            testing_url,
+            created_at,
             maintainer,
             updated_at: created_at // Use created_at as fallback for updated_at
         })
@@ -84,63 +92,84 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
     return (
         <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-[#A33C13]/30 hover:border-[#A33C13] transition-colors"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="group relative bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md hover:border-[#A33C13]/30 transition-all duration-300 flex flex-col h-full"
         >
-            {/* Header with title and status */}
-            <div className="flex justify-between items-start mb-3">
-                <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-1">{title}</h3>
-                    <p className="text-xs text-gray-600">{formatDate(created_at)} • by {maintainer.fullname}</p>
+            {/* Top Right Action Icons */}
+            <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <button
+                    onClick={(e) => { e.stopPropagation(); handleEdit(); }}
+                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                    title="Edit"
+                >
+                    <FiEdit2 size={16} />
+                </button>
+                <button
+                    onClick={(e) => { e.stopPropagation(); handleDelete(); }}
+                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    title="Delete"
+                >
+                    <FiTrash2 size={16} />
+                </button>
+            </div>
+
+            {/* Header Section */}
+            <div className="mb-4 pr-16"> {/* pr-16 prevents title overlapping icons */}
+                <div className="flex items-center gap-3 mb-2">
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusColor(status)}`}>
+                        {status}
+                    </span>
                 </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    status === 'active' ? 'bg-green-500/20 text-green-400' :
-                    status === 'inactive' ? 'bg-yellow-500/20 text-yellow-400' :
-                    'bg-blue-500/20 text-blue-400'
-                }`}>
-                    {status.toUpperCase()}
-                </span>
+                <h3 className="text-xl font-bold text-gray-900 leading-tight line-clamp-1 group-hover:text-[#A33C13] transition-colors">
+                    {title}
+                </h3>
+            </div>
+
+            {/* Meta Data (Date & Maintainer) */}
+            <div className="flex items-center gap-4 text-xs text-gray-500 mb-4 pb-4 border-b border-gray-100">
+                <div className="flex items-center gap-1.5">
+                    <FiCalendar className="text-gray-400" />
+                    <span>{formatDate(created_at)}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                    <FiUser className="text-gray-400" />
+                    <span className="truncate max-w-[100px]">{maintainer.fullname}</span>
+                </div>
             </div>
 
             {/* Description */}
-            <p className="text-gray-700 mb-3 text-sm line-clamp-2">{description}</p>
+            <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-3 flex-grow">
+                {description}
+            </p>
 
-            {/* Tech and Category - inline */}
-            <div className="flex items-center gap-4 mb-3 text-xs">
-                <div className="flex items-center gap-1">
-                    <span className="text-[#A33C13] font-medium">Tech:</span>
-                    <span className="text-gray-700 truncate">{technology_stack}</span>
+            {/* Tags Section */}
+            <div className="space-y-2 mb-6">
+                <div className="flex items-center gap-2 text-xs">
+                    <FiCode className="text-[#A33C13]" />
+                    <span className="font-semibold text-gray-700">Tech:</span>
+                    <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[11px] truncate max-w-[180px]">
+                        {technology_stack}
+                    </span>
                 </div>
-                <div className="flex items-center gap-1">
-                    <span className="text-[#A33C13] font-medium">Type:</span>
-                    <span className="text-gray-700 capitalize">{category}</span>
+                <div className="flex items-center gap-2 text-xs">
+                    <FiLayers className="text-[#A33C13]" />
+                    <span className="font-semibold text-gray-700">Type:</span>
+                    <span className="text-gray-600 capitalize">
+                        {category}
+                    </span>
                 </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-                <button 
-                    onClick={handleViewDetails}
-                    className="flex-1 bg-[#A33C13] text-white py-2 px-3 rounded hover:bg-[#8a2f0f] transition-colors text-sm"
-                >
-                    View Details
-                </button>
-                <button 
-                    onClick={handleEdit}
-                    className="bg-gray-600 text-white py-2 px-3 rounded hover:bg-blue-700 transition-colors text-sm"
-                >
-                    Edit
-                </button>
-                <button 
-                    onClick={handleDelete}
-                    className="bg-red-500 text-white py-2 px-3 rounded hover:bg-red-700 transition-colors text-sm"
-                >
-                    Delete
-                </button>
-
-            </div>
+            {/* Footer Action */}
+            <button
+                onClick={handleViewDetails}
+                className="w-full mt-auto flex items-center justify-center gap-2 bg-gray-900 text-white py-2.5 px-4 rounded-lg hover:bg-[#A33C13] active:scale-95 transition-all duration-200 text-sm font-medium"
+            >
+                View Details
+                <FiArrowRight />
+            </button>
         </motion.div>
     )
 }
@@ -152,7 +181,7 @@ function ProjectsPage() {
     const [updateLoading, setUpdateLoading] = useState(false)
     const [deleteLoading, setDeleteLoading] = useState(false)
     const [showDeleteModal, setShowDeleteModal] = useState(false)
-    const [projectToDelete, setProjectToDelete] = useState<{id: number, title: string} | null>(null)
+    const [projectToDelete, setProjectToDelete] = useState<{ id: number, title: string } | null>(null)
     const [currentView, setCurrentView] = useState<'list' | 'create' | 'details' | 'edit'>('list')
     const [selectedProject, setSelectedProject] = useState<number | null>(null)
     const [editingProject, setEditingProject] = useState<ProjectResponse | null>(null)
@@ -223,7 +252,7 @@ function ProjectsPage() {
 
     const handleUpdateProject = async (data: CreateProjectFormData) => {
         if (!editingProject) return;
-        
+
         setUpdateLoading(true);
         const loadingToast = showToast.loading('Updating project...');
 
@@ -235,7 +264,7 @@ function ProjectsPage() {
 
             // Update the project in the projects list
             setProjects(prev => prev.map(p => p.id === editingProject.id ? response : p));
-            
+
             // Switch back to list view
             setCurrentView('list');
             setEditingProject(null);
@@ -277,7 +306,7 @@ function ProjectsPage() {
 
     const confirmDeleteProject = async () => {
         if (!projectToDelete) return;
-        
+
         setDeleteLoading(true);
         const loadingToast = showToast.loading('Deleting project...');
 
@@ -337,11 +366,13 @@ function ProjectsPage() {
     // Show create project view
     if (currentView === 'create') {
         return (
-            <MaintainerCreateProject
-                onBack={() => setCurrentView('list')}
-                onSubmit={handleCreateProject}
-                loading={createLoading}
-            />
+            <AnimatePresence>
+                <MaintainerCreateProject
+                    onBack={() => setCurrentView('list')}
+                    onSubmit={handleCreateProject}
+                    loading={createLoading}
+                />
+            </AnimatePresence>
         )
     }
 
@@ -372,7 +403,7 @@ function ProjectsPage() {
     if (currentView === 'details' && selectedProject) {
         const projectData = projects.find(p => p.id === selectedProject)
         return (
-            <ProjectDetailPage 
+            <ProjectDetailPage
                 projectId={selectedProject.toString()}
                 projectData={projectData}
                 onBack={() => {
@@ -449,7 +480,7 @@ function ProjectsPage() {
                     )}
                 </motion.div>
             </div>
-            
+
             {/* Confirm Delete Modal */}
             <ConfirmDeleteModal
                 isOpen={showDeleteModal}
