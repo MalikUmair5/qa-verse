@@ -75,7 +75,7 @@ export default function SignupForm({ role }: SignupFormProps) {
       const payload: RegisterPayload = {
         fullname: data.fullname,
         email: data.email,
-        role: role === "tester" ? "tester" : "project_owner",
+        role: role === "tester" ? "tester" : "maintainer",
         password: data.password,
         password2: data.password2,
         bio: data.bio,

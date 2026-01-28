@@ -3,6 +3,7 @@ import axiosInstance from '../axiosInstance';
 export interface ProjectPayload {
   title: string;
   description: string;
+  instructions: string[];
   technology_stack: string;
   testing_url: string;
   category: 'web' | 'mobile' | 'api' | 'desktop';
@@ -23,6 +24,7 @@ export interface ProjectResponse {
   };
   title: string;
   description: string;
+  instructions: string[];
   technology_stack: string;
   testing_url: string;
   category: string;

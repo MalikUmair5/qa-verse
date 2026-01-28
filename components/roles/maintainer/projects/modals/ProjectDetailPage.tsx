@@ -4,11 +4,11 @@ import { motion } from 'framer-motion'
 import { FiArrowLeft } from 'react-icons/fi'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Loader from '@/components/ui/loader'
-import { ProjectResponse } from '@/lib/api/project-owner/projects'
+import { ProjectInterface } from '@/lib/api/project-owner/projects'
 
 interface ProjectDetailPageProps {
   projectId: string
-  projectData?: ProjectResponse | null
+  projectData?: ProjectInterface | null
   onBack?: () => void
 }
 
@@ -85,9 +85,9 @@ function ProjectDetailPage({ projectId, projectData, onBack }: ProjectDetailPage
     maintainerEmail: projectData.maintainer.email,
     githubUrl: projectData.maintainer.github_url,
     linkedinUrl: projectData.maintainer.linkedin_url,
-    instructions: [
+    instructions: projectData.instructions || [
       'Visit the project URL below',
-      'Test the application functionality',
+      'Test the application functionality', 
       'Report any bugs you find',
       'Provide detailed feedback'
     ],
@@ -179,7 +179,7 @@ function ProjectDetailPage({ projectId, projectData, onBack }: ProjectDetailPage
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => window.open(project.githubUrl, '_blank')}
+                  onClick={() => project.githubUrl && window.open(project.githubUrl, '_blank')}
                   className='px-6 py-3 border-2 border-[#171717] text-[#171717] rounded-lg font-medium hover:bg-[#171717] hover:text-white transition-colors duration-300 flex items-center gap-2 shadow-sm'
                 >
                   <span>↗</span>
