@@ -10,7 +10,7 @@ import FileUpload from '@/components/ui/fileUpload'
 import { AttachmentList } from '@/components/ui/attachmentCard'
 import { addAttachmentToBugReport, AttachmentResponse, removeAttachmentFromBugReport } from '@/lib/api/tester/bugReport'
 import toast from 'react-hot-toast'
-import EditAttachmentModal from './EditAttachmentModal'
+import EditAttachmentModal from '../roles/tester/EditAttachmentModal'
 
 interface AttachmentModalProps {
   isOpen: boolean

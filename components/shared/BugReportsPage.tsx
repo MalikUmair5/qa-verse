@@ -2,14 +2,14 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { 
-  FiCalendar, 
-  FiClock, 
-  FiLayout, 
-  FiSettings, 
-  FiZap, 
-  FiShield, 
-  FiSmartphone, 
+import {
+  FiCalendar,
+  FiClock,
+  FiLayout,
+  FiSettings,
+  FiZap,
+  FiShield,
+  FiSmartphone,
   FiAlertCircle,
   FiCheckCircle,
   FiActivity,
@@ -26,8 +26,9 @@ import { getBugReports, BugReportResponse, updateBugReport, deleteBugReport, Att
 import toast from 'react-hot-toast'
 import Loader from '@/components/ui/loader'
 import ConfirmDeleteModal from '@/components/roles/common/modals/confirmDelete'
-import AttachmentModal from '../../shared/AttachmentModal'
+import AttachmentModal from './AttachmentModal'
 import { AttachmentList } from '@/components/ui/attachmentCard'
+import { useAuthStore } from '@/store/authStore'
 
 // Define the interface based on usage
 interface BugReportCardProps {
@@ -49,19 +50,19 @@ interface BugReportCardProps {
 }
 
 const BugReportCard: React.FC<BugReportCardProps> = ({ bugReport, onViewDetails, onEdit, onDelete, onAddAttachment }) => {
-  
+
   // Elegant/Subtle Severity Styling
   const getSeverityStyles = (severity: string) => {
     switch (severity.toLowerCase()) {
-      case 'critical': 
+      case 'critical':
         return 'bg-red-100 text-red-700 border-red-200'
-      case 'high': 
+      case 'high':
         return 'bg-orange-100 text-orange-700 border-orange-200'
-      case 'medium': 
+      case 'medium':
         return 'bg-yellow-100 text-yellow-700 border-yellow-200'
-      case 'low': 
+      case 'low':
         return 'bg-green-100 text-green-700 border-green-200'
-      default: 
+      default:
         return 'bg-gray-100 text-gray-700 border-gray-200'
     }
   }
@@ -86,7 +87,7 @@ const BugReportCard: React.FC<BugReportCardProps> = ({ bugReport, onViewDetails,
       case 'security': return <FiShield />
       case 'compatibility': return <FiSmartphone />
       // Fallback to FiAlertCircle since FiBug does not exist in 'fi'
-      default: return <FiAlertCircle /> 
+      default: return <FiAlertCircle />
     }
   }
 
@@ -187,7 +188,7 @@ const BugReportCard: React.FC<BugReportCardProps> = ({ bugReport, onViewDetails,
             {bugReport.category}
           </span>
         </div>
-        
+
         {/* Attachment Count */}
         {bugReport.attachments && bugReport.attachments.length > 0 && (
           <div className="flex items-center gap-2 text-xs">
@@ -217,11 +218,11 @@ function BugReportsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [bugReports, setBugReports] = useState<BugReportResponse[]>([])
-  
+
   // Delete modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [bugToDelete, setBugToDelete] = useState<{ id: string, title: string } | null>(null)
-  
+
   // Attachment modal state
   const [showAttachmentModal, setShowAttachmentModal] = useState(false)
   const [selectedBugForAttachment, setSelectedBugForAttachment] = useState<string | null>(null)
@@ -242,9 +243,12 @@ function BugReportsPage() {
 
     fetchBugReports()
   }, [])
-
+  const userRole = useAuthStore().user?.role
   const handleViewBugDetails = (bugId: string) => {
-    router.push(`/tester/projects/bug/${bugId}`)
+    if (userRole == 'tester')
+      router.push(`/tester/projects/bug/${bugId}`)
+    else if (userRole == 'maintainer')
+      router.push(`/maintainer/bugs/bug/${bugId}`)
   }
 
   const handleEditBug = (bugId: string) => {
@@ -266,8 +270,8 @@ function BugReportsPage() {
 
   const handleAttachmentAdded = (attachment: AttachmentResponse) => {
     // Update the bug reports list with the new attachment
-    setBugReports(prev => prev.map(bug => 
-      bug.id === attachment.bug_report 
+    setBugReports(prev => prev.map(bug =>
+      bug.id === attachment.bug_report
         ? { ...bug, attachments: [...(bug.attachments || []), attachment] }
         : bug
     ))
@@ -291,7 +295,7 @@ function BugReportsPage() {
       await deleteBugReport(bugToDelete.id)
       toast.dismiss(loadingToast)
       toast.success(`Bug report "${bugToDelete.title}" deleted successfully!`)
-      
+
       // Remove bug report from list and close modal
       setBugReports(prev => prev.filter(bug => bug.id !== bugToDelete.id))
       setShowDeleteModal(false)
@@ -344,7 +348,7 @@ function BugReportsPage() {
 
             {/* Stats Bar */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <motion.div 
+              <motion.div
                 className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -353,7 +357,7 @@ function BugReportsPage() {
                 <div className="text-2xl font-bold text-[#171717]">{bugReports.length}</div>
                 <div className="text-sm text-gray-500 font-medium">Total Reports</div>
               </motion.div>
-              <motion.div 
+              <motion.div
                 className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -364,7 +368,7 @@ function BugReportsPage() {
                 </div>
                 <div className="text-sm text-gray-500 font-medium">Pending</div>
               </motion.div>
-              <motion.div 
+              <motion.div
                 className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -375,7 +379,7 @@ function BugReportsPage() {
                 </div>
                 <div className="text-sm text-gray-500 font-medium">In Progress</div>
               </motion.div>
-              <motion.div 
+              <motion.div
                 className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -399,7 +403,7 @@ function BugReportsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  <BugReportCard 
+                  <BugReportCard
                     bugReport={bugReport}
                     onViewDetails={handleViewBugDetails}
                     onEdit={handleEditBug}
@@ -410,7 +414,7 @@ function BugReportsPage() {
               ))}
             </div>
           ) : (
-            <motion.div 
+            <motion.div
               className="flex flex-col items-center justify-center py-16"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

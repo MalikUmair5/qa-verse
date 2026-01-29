@@ -19,15 +19,20 @@ import {
   FiPaperclip,
   FiPlus,
   FiEdit,
-  FiTrash2
+  FiTrash2,
+  FiThumbsUp,
+  FiThumbsDown,
+  FiCheck
 } from 'react-icons/fi'
-import { getBugReportById, BugReportResponse, AttachmentResponse, deleteBugReport } from '@/lib/api/tester/bugReport'
+import { getBugReportById, BugReportResponse, AttachmentResponse, deleteBugReport, approveBugReport, rejectBugReport, resolveBugReport } from '@/lib/api/tester/bugReport'
 import { CommentResponse } from '@/lib/api/tester/comments'
+import { getProjectById, ProjectInterface } from '@/lib/api/project-owner/projects'
 import toast from 'react-hot-toast'
 import Loader from '@/components/ui/loader'
-import AttachmentModal from '../../shared/AttachmentModal'
+import AttachmentModal from './AttachmentModal'
 import { AttachmentList } from '@/components/ui/attachmentCard'
 import Comments from './Comments'
+import { useAuthStore } from '@/store/authStore'
 
 interface BugReportDetailPageProps {
   bugId: string
@@ -43,9 +48,17 @@ const contentAnimation = {
 
 function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
   const router = useRouter()
+  const userRole = useAuthStore().user?.role
   const [isLoading, setIsLoading] = useState(true)
   const [bugReport, setBugReport] = useState<BugReportResponse | null>(null)
-  const [comments, setComments] = useState<CommentResponse[]>([])  
+  const [comments, setComments] = useState<CommentResponse[]>([])
+  const [project, setProject] = useState<ProjectInterface | null>(null)
+  const [projectLoading, setProjectLoading] = useState(false)
+  
+  // Action states
+  const [isApproving, setIsApproving] = useState(false)
+  const [isRejecting, setIsRejecting] = useState(false)
+  const [isResolving, setIsResolving] = useState(false)  
   
   // Attachment modal state
   const [showAttachmentModal, setShowAttachmentModal] = useState(false)
@@ -65,10 +78,27 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
         if (response.comments) {
           setComments(response.comments)
         }
+        
+        // Fetch project details
+        if (response.project) {
+          setProjectLoading(true)
+          try {
+            const projectData = await getProjectById(response.project)
+            setProject(projectData)
+          } catch (projectError) {
+            console.error('Error fetching project details:', projectError)
+          } finally {
+            setProjectLoading(false)
+          }
+        }
       } catch (error) {
         console.error('Error fetching bug report:', error)
         toast.error('Failed to load bug report details')
-        router.push('/tester/projects')
+        if (userRole === 'tester') {
+          router.push('/tester/projects')
+        } else if (userRole === 'maintainer') {
+          router.push('/maintainer/bugs')
+        }
       } finally {
         setIsLoading(false)
       }
@@ -101,7 +131,13 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
   }
 
   const handleBack = () => {
-    router.push('/tester/projects')
+    if (userRole === 'tester') {
+      router.push('/tester/projects')
+    } else if (userRole === 'maintainer') {
+      router.push('/maintainer/bugs')
+    } else {
+      router.back()
+    }
   }
 
   const handleAttachmentAdded = (attachment: AttachmentResponse) => {
@@ -151,7 +187,11 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
 
   const handleEdit = () => {
     if (bugReport) {
-      router.push(`/tester/report-bug?bugId=${bugReport.id}`)
+      if (userRole === 'tester') {
+        router.push(`/tester/report-bug?bugId=${bugReport.id}`)
+      } else if (userRole === 'maintainer') {
+        router.push(`/maintainer/bugs/bug/${bugReport.id}/edit`)
+      }
     }
   }
 
@@ -166,13 +206,71 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
       setIsDeleting(true)
       await deleteBugReport(bugReport.id)
       toast.success('Bug report deleted successfully!')
-      router.push('/tester/projects')
+      if (userRole === 'tester') {
+        router.push('/tester/projects')
+      } else if (userRole === 'maintainer') {
+        router.push('/maintainer/bugs')
+      }
     } catch (error) {
       console.error('Error deleting bug report:', error)
       toast.error('Failed to delete bug report')
     } finally {
       setIsDeleting(false)
       setShowDeleteConfirm(false)
+    }
+  }
+
+  const handleApprove = async () => {
+    if (!bugReport) return
+    
+    try {
+      setIsApproving(true)
+      await approveBugReport(bugReport.id)
+      toast.success('Bug report approved successfully!')
+      // Refetch bug report to get updated status
+      const updatedReport = await getBugReportById(bugId)
+      setBugReport(updatedReport)
+    } catch (error) {
+      console.error('Error approving bug report:', error)
+      toast.error('Failed to approve bug report')
+    } finally {
+      setIsApproving(false)
+    }
+  }
+
+  const handleReject = async () => {
+    if (!bugReport) return
+    
+    try {
+      setIsRejecting(true)
+      await rejectBugReport(bugReport.id)
+      toast.success('Bug report rejected successfully!')
+      // Refetch bug report to get updated status
+      const updatedReport = await getBugReportById(bugId)
+      setBugReport(updatedReport)
+    } catch (error) {
+      console.error('Error rejecting bug report:', error)
+      toast.error('Failed to reject bug report')
+    } finally {
+      setIsRejecting(false)
+    }
+  }
+
+  const handleResolve = async () => {
+    if (!bugReport) return
+    
+    try {
+      setIsResolving(true)
+      await resolveBugReport(bugReport.id)
+      toast.success('Bug report resolved successfully!')
+      // Refetch bug report to get updated status
+      const updatedReport = await getBugReportById(bugId)
+      setBugReport(updatedReport)
+    } catch (error) {
+      console.error('Error resolving bug report:', error)
+      toast.error('Failed to resolve bug report')
+    } finally {
+      setIsResolving(false)
     }
   }
 
@@ -364,10 +462,84 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
               <h3 className='text-lg sm:text-xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
                  <span>📁</span> Project Details
               </h3>
-              <div className="mb-6 p-3 bg-gray-50 rounded-lg">
-                 <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Project ID</p>
-                 <p className="text-[#171717] font-mono text-sm break-all">{bugReport.project}</p>
-              </div>
+              {projectLoading ? (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              ) : project ? (
+                <div className="mb-6 space-y-3">
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                    <h4 className="font-bold text-gray-900 text-lg mb-2">{project.title}</h4>
+                    <p className="text-gray-700 text-sm mb-3 leading-relaxed">{project.description}</p>
+                    
+                    <div className="grid grid-cols-1 gap-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Category</span>
+                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium capitalize">
+                          {project.category}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</span>
+                        <span className={`px-2 py-1 rounded text-xs font-medium capitalize ${
+                          project.status === 'active' ? 'bg-green-100 text-green-700' :
+                          project.status === 'completed' ? 'bg-gray-100 text-gray-700' :
+                          'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {project.status}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Tech Stack</span>
+                        <span className="text-xs text-gray-700 font-mono bg-gray-100 px-2 py-1 rounded">
+                          {project.technology_stack}
+                        </span>
+                      </div>
+                      
+                      {project.testing_url && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Testing URL</span>
+                          <a 
+                            href={project.testing_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-600 hover:text-blue-800 underline truncate max-w-[150px]"
+                          >
+                            {project.testing_url}
+                          </a>
+                        </div>
+                      )}
+                      
+                      <div className="pt-2 border-t border-blue-200">
+                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">Maintainer</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+                            <FiUser className="w-3 h-3 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{project.maintainer.fullname}</p>
+                            <p className="text-xs text-gray-500">{project.maintainer.email}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Project ID</p>
+                    <p className="text-[#171717] font-mono text-xs break-all">{bugReport.project}</p>
+                  </div> */}
+                </div>
+              ) : (
+                <div className="mb-6 p-3 bg-gray-50 rounded-lg">
+                   <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Project ID</p>
+                   <p className="text-[#171717] font-mono text-sm break-all">{bugReport.project}</p>
+                   <p className="text-xs text-red-500 mt-1">Project details unavailable</p>
+                </div>
+              )}
 
               {/* Timestamps */}
               <h3 className='text-lg sm:text-xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
@@ -396,40 +568,91 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
 
               {/* Action Buttons */}
               <div className="mt-8 space-y-3">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleEdit}
-                  className='w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-sm'
-                >
-                  <FiEdit /> Edit Bug Report
-                </motion.button>
+                {userRole === 'maintainer' ? (
+                  // Maintainer Actions
+                  <>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleApprove}
+                      disabled={isApproving}
+                      className='w-full py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-sm disabled:opacity-50'
+                    >
+                      {isApproving ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      ) : (
+                        <FiThumbsUp />
+                      )}
+                      {isApproving ? 'Approving...' : 'Approve Bug'}
+                    </motion.button>
 
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className='w-full py-2.5 bg-[#A33C13] text-white rounded-lg font-medium hover:bg-[#8a2f0f] transition-colors duration-300 flex items-center justify-center gap-2 shadow-sm'
-                >
-                  <FiMessageSquare /> Add Comment
-                </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleResolve}
+                      disabled={isResolving}
+                      className='w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-sm disabled:opacity-50'
+                    >
+                      {isResolving ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      ) : (
+                        <FiCheck />
+                      )}
+                      {isResolving ? 'Resolving...' : 'Resolve Bug'}
+                    </motion.button>
 
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleDelete}
-                  className='w-full py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-sm'
-                >
-                  <FiTrash2 /> Delete Bug Report
-                </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleReject}
+                      disabled={isRejecting}
+                      className='w-full py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-sm disabled:opacity-50'
+                    >
+                      {isRejecting ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      ) : (
+                        <FiThumbsDown />
+                      )}
+                      {isRejecting ? 'Rejecting...' : 'Reject Bug'}
+                    </motion.button>
+                  </>
+                ) : (
+                  // Tester Actions
+                  <>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleEdit}
+                      className='w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-sm'
+                    >
+                      <FiEdit /> Edit Bug Report
+                    </motion.button>
+
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleDelete}
+                      className='w-full py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-sm'
+                    >
+                      <FiTrash2 /> Delete Bug Report
+                    </motion.button>
+                  </>
+                )}
 
                 {/* Optional View Project Link */}
                 <motion.button
                    whileHover={{ scale: 1.02 }}
                    whileTap={{ scale: 0.98 }}
-                   onClick={() => router.push(`/tester/projects`)} // Or specific project link if ID available
+                   onClick={() => {
+                     if (userRole === 'tester') {
+                       router.push('/tester/projects')
+                     } else if (userRole === 'maintainer') {
+                       router.push('/maintainer/bugs')
+                     }
+                   }}
                    className='w-full py-2.5 border border-gray-200 text-gray-600 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-300 flex items-center justify-center gap-2'
                 >
-                   <FiCornerDownRight /> View Project
+                   <FiCornerDownRight /> {userRole === 'maintainer' ? 'Back to Bugs' : 'View Project'}
                 </motion.button>
               </div>
 

@@ -1,4 +1,5 @@
 import axiosInstance from '../axiosInstance'
+import { CommentResponse } from './comments'
 
 export interface BugReportPayload {
   project: string
@@ -21,8 +22,8 @@ export interface BugReportResponse {
   status: string
   created_at: string
   updated_at: string
-  attachments: any[]
-  comments: any[]
+  attachments: AttachmentResponse[]
+  comments: CommentResponse[]
 }
 
 export interface BugReportsListResponse {
@@ -195,6 +196,54 @@ export async function updateAttachment(attachmentId: string, attachmentData: {
     return response.data
   } catch (error: unknown) {
     console.error('Update attachment error:', error)
+    throw error
+  }
+}
+
+// Maintainer actions - Approve bug report
+export async function approveBugReport(bugReportId: string): Promise<void> {
+  try {
+    const response = await axiosInstance.post(
+      `/bugs/reports/${bugReportId}/approve/`
+    )
+    
+    if (response.status !== 200 && response.status !== 201) {
+      throw new Error('Failed to approve bug report')
+    }
+  } catch (error: unknown) {
+    console.error('Approve bug report error:', error)
+    throw error
+  }
+}
+
+// Maintainer actions - Reject bug report
+export async function rejectBugReport(bugReportId: string): Promise<void> {
+  try {
+    const response = await axiosInstance.post(
+      `/bugs/reports/${bugReportId}/reject/`
+    )
+    
+    if (response.status !== 200 && response.status !== 201) {
+      throw new Error('Failed to reject bug report')
+    }
+  } catch (error: unknown) {
+    console.error('Reject bug report error:', error)
+    throw error
+  }
+}
+
+// Maintainer actions - Resolve bug report
+export async function resolveBugReport(bugReportId: string): Promise<void> {
+  try {
+    const response = await axiosInstance.post(
+      `/bugs/reports/${bugReportId}/resolve/`
+    )
+    
+    if (response.status !== 200 && response.status !== 201) {
+      throw new Error('Failed to resolve bug report')
+    }
+  } catch (error: unknown) {
+    console.error('Resolve bug report error:', error)
     throw error
   }
 }
