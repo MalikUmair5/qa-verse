@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Loader from '@/components/ui/loader'
+import { getLeaderboard, type LeaderboardEntry } from '@/lib/api/tester/leaderboard'
 
 interface TopTesterProps {
   name: string
@@ -117,30 +118,74 @@ const TesterRow: React.FC<TesterRowProps> = ({ rank, name, username, xp, image }
 
 function LeaderBoardPage() {
   const [isLoading, setIsLoading] = useState(true)
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([])
+  const [error, setError] = useState<string | null>(null)
 
-  // Simulate loading data
+  // Fetch leaderboard data
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
+    const fetchLeaderboard = async () => {
+      try {
+        setIsLoading(true)
+        const data = await getLeaderboard()
+        setLeaderboardData(data)
+        setError(null)
+      } catch (err) {
+        setError('Failed to load leaderboard data')
+        console.error('Error loading leaderboard:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
 
-    return () => clearTimeout(timer)
+    fetchLeaderboard()
   }, [])
 
-  const topTesters = [
-    { name: 'Jam Smith', rank: 2, xp: 1200, bgColor: 'bg-gray-300' },
-    { name: 'Jojo Smith', rank: 1, xp: 2200, bgColor: 'bg-yellow-200' },
-    { name: 'John Smith', rank: 3, xp: 800, bgColor: 'bg-orange-200' },
-  ]
+  // Transform data for display
+  const topTesters = leaderboardData
+    .slice(0, 3)
+    .map((user, index) => ({
+      name: user.fullname,
+      rank: index + 1,
+      xp: user.total_xp,
+      bgColor: index === 0 ? 'bg-yellow-200' : index === 1 ? 'bg-gray-300' : 'bg-orange-200'
+    }))
 
-  const otherTesters = [
-    { rank: 4, name: 'Henrietta O&apos;Connell', username: 'enrietta', xp: 750 },
-    { rank: 5, name: 'Henrietta O&apos;Connell', username: 'enrietta', xp: 624 },
-  ]
+  // Show ALL users in table with proper ranking
+  const allTesters = leaderboardData
+    .map((user, index) => ({
+      rank: index + 1,
+      name: user.fullname,
+      username: user.email.split('@')[0], // Use email prefix as username
+      xp: user.total_xp
+    }))
 
   // Show loader while loading
   if (isLoading) {
     return <Loader />
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#FFFCFB] flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-red-600 mb-2">Error Loading Leaderboard</h2>
+          <p className="text-gray-600">{error}</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show empty state if no data
+  if (leaderboardData.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#FFFCFB] flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-gray-600 mb-2">No Leaderboard Data</h2>
+          <p className="text-gray-500">Be the first to earn XP and appear on the leaderboard!</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -162,7 +207,7 @@ function LeaderBoardPage() {
         {/* Top 3 Podium - Horizontal on mobile, Vertical podium on desktop */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-center gap-3 md:gap-6 mb-6 md:mb-8 max-w-5xl mx-auto">
           {/* Cards will reorder using order-* classes */}
-          {topTesters.map((tester) => (
+          {topTesters.length > 0 && topTesters.map((tester) => (
             <div key={tester.rank} className="w-full md:flex-1 md:max-w-xs">
               <TopTesterCard {...tester} />
             </div>
@@ -170,23 +215,25 @@ function LeaderBoardPage() {
         </div>
 
         {/* Leaderboard Table */}
-        <div className="max-w-5xl mx-auto pb-6">
-          {/* Table Header */}
-          <div className="bg-orange-700 text-white rounded-t-lg py-3 md:py-4 px-3 md:px-6 flex items-center justify-between font-bold text-sm md:text-lg">
-            <div className="flex items-center space-x-2 md:space-x-4 flex-1">
-              <span>Rank</span>
-              <span className="ml-8 md:ml-12">Tester</span>
+        {(leaderboardData.length > 0) && (
+          <div className="max-w-5xl mx-auto pb-6">
+            {/* Table Header */}
+            <div className="bg-orange-700 text-white rounded-t-lg py-3 md:py-4 px-3 md:px-6 flex items-center justify-between font-bold text-sm md:text-lg">
+              <div className="flex items-center space-x-2 md:space-x-4 flex-1">
+                <span>Rank</span>
+                <span className="ml-8 md:ml-12">Tester</span>
+              </div>
+              <span>XP</span>
             </div>
-            <span>XP</span>
-          </div>
 
-          {/* Table Body */}
-          <div className="bg-white rounded-b-lg shadow-lg p-3 md:p-4 space-y-2">
-            {otherTesters.map((tester) => (
-              <TesterRow key={tester.rank} {...tester} />
-            ))}
+            {/* Table Body */}
+            <div className="bg-white rounded-b-lg shadow-lg p-3 md:p-4 space-y-2">
+              {allTesters.map((tester) => (
+                <TesterRow key={tester.rank} {...tester} />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
         </motion.div>
       </div>
     </div>

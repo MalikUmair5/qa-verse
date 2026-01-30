@@ -5,6 +5,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import ThemeButton from '@/components/ui/button'
 import { HiMenuAlt2 } from 'react-icons/hi'
+import { IoMdNotifications } from 'react-icons/io'
+import { useAuthStore } from '@/store/authStore'
+import { useRouter } from 'next/navigation'
 
 interface HeaderProps {
   authenticated?: boolean
@@ -14,6 +17,17 @@ interface HeaderProps {
 }
 
 function Header({ authenticated, hasSidebar = false, toggleSidebar, isExpanded = false }: HeaderProps) {
+  const currentRole = useAuthStore().user?.role
+  const router = useRouter();
+
+  const handleNavigate = () => {
+    if (currentRole === 'tester') {
+      router.push('/tester/notifications')
+    }
+    else if (currentRole === 'maintainer') {
+      router.push('/maintainer/notifications')
+    }
+  }
 
   return (
     <motion.header
@@ -40,7 +54,7 @@ function Header({ authenticated, hasSidebar = false, toggleSidebar, isExpanded =
               <HiMenuAlt2 size={24} className="text-[#A33C13]" />
             </motion.button>
           )}
-          
+
           {/* Logo for non-sidebar pages */}
           {!hasSidebar && (
             <Link href="/">
@@ -81,6 +95,9 @@ function Header({ authenticated, hasSidebar = false, toggleSidebar, isExpanded =
                 height={40}
                 className="rounded-full"
               />
+              <div onClick={handleNavigate} className="cursor-pointer">
+                <IoMdNotifications size={24} className="text-[#A33C13]" />
+              </div>
             </motion.div>
           ) : (
             <motion.div

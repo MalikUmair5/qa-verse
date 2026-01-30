@@ -2,11 +2,11 @@
 import React, { useEffect, Suspense, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
-import { MdBugReport, MdOutlineDashboard } from "react-icons/md";
+import { MdBugReport, MdLeaderboard, MdOutlineDashboard, MdOutlineFindReplace } from "react-icons/md";
 import { ImProfile } from "react-icons/im";
 import { RiGitMergeLine, RiTrophyLine } from "react-icons/ri";
 import { CgProfile } from "react-icons/cg";
-import { IoIosLogOut, IoMdSettings } from "react-icons/io";
+import { IoIosLogOut, IoMdNotifications, IoMdSettings } from "react-icons/io";
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useSidebar } from '@/app/context/SidebarContext';
@@ -14,6 +14,8 @@ import logout from '@/lib/api/auth/logout';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
 import { useLoading } from '@/app/(roles)/layout'; // or wherever LoadingContext is defined
+import { TbReportSearch } from "react-icons/tb";
+
 
 interface MenuItem {
   label: string;
@@ -25,18 +27,23 @@ interface MenuItem {
 const TESTER_MENU: MenuItem[] = [
   {
     label: "Explore Projects",
-    icon: <MdOutlineDashboard size={20} />,
+    icon: <MdOutlineFindReplace size={20} />,
     path: '/tester/dashboard'
   },
   {
-    label: "My Projects",
-    icon: <RiTrophyLine size={20} />,
+    label: "My Bug Reports",
+    icon: <TbReportSearch size={20} />,
     path: '/tester/projects'
   },
   {
     label: "Leaderboard",
-    icon: <CgProfile size={20} />,
+    icon: <MdLeaderboard size={20} />,
     path: '/tester/leader-board'
+  },
+  {
+    label: "notifications",
+    icon: <IoMdNotifications size={20} />,
+    path: '/tester/notifications'
   },
   {
     label: "Profile",
@@ -62,9 +69,19 @@ const MAINTAINER_MENU: MenuItem[] = [
     path: '/maintainer/bugs'
   },
   {
+    label: "Leaderboard",
+    icon: <MdLeaderboard size={20} />,
+    path: '/maintainer/leader-board'
+  },
+  {
     label: "Profile",
     icon: <ImProfile size={20} />,
     path: '/maintainer/profile'
+  },
+  {
+    label: "notifications",
+    icon: <IoMdNotifications size={20} />,
+    path: '/maintainer/notifications'
   },
   {
     label: "Settings",
@@ -126,7 +143,7 @@ function SidebarContent() {
 
   const handleLogout = () => {
     try {
-      setIsLoading(true); 
+      setIsLoading(true);
       logout();
       router.push('/signin');
 

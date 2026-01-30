@@ -571,50 +571,65 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
                 {userRole === 'maintainer' ? (
                   // Maintainer Actions
                   <>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleApprove}
-                      disabled={isApproving}
-                      className='w-full py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-sm disabled:opacity-50'
-                    >
-                      {isApproving ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      ) : (
-                        <FiThumbsUp />
-                      )}
-                      {isApproving ? 'Approving...' : 'Approve Bug'}
-                    </motion.button>
+                    {bugReport.status === 'pending' ? (
+                      // Show action buttons for pending status
+                      <>
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleApprove}
+                          disabled={isApproving}
+                          className='w-full py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-sm disabled:opacity-50'
+                        >
+                          {isApproving ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          ) : (
+                            <FiThumbsUp />
+                          )}
+                          {isApproving ? 'Approving...' : 'Approve Bug'}
+                        </motion.button>
 
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleResolve}
-                      disabled={isResolving}
-                      className='w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-sm disabled:opacity-50'
-                    >
-                      {isResolving ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      ) : (
-                        <FiCheck />
-                      )}
-                      {isResolving ? 'Resolving...' : 'Resolve Bug'}
-                    </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleResolve}
+                          disabled={isResolving}
+                          className='w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-sm disabled:opacity-50'
+                        >
+                          {isResolving ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          ) : (
+                            <FiCheck />
+                          )}
+                          {isResolving ? 'Resolving...' : 'Resolve Bug'}
+                        </motion.button>
 
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleReject}
-                      disabled={isRejecting}
-                      className='w-full py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-sm disabled:opacity-50'
-                    >
-                      {isRejecting ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      ) : (
-                        <FiThumbsDown />
-                      )}
-                      {isRejecting ? 'Rejecting...' : 'Reject Bug'}
-                    </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleReject}
+                          disabled={isRejecting}
+                          className='w-full py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors duration-300 flex items-center justify-center gap-2 shadow-sm disabled:opacity-50'
+                        >
+                          {isRejecting ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          ) : (
+                            <FiThumbsDown />
+                          )}
+                          {isRejecting ? 'Rejecting...' : 'Reject Bug'}
+                        </motion.button>
+                      </>
+                    ) : (
+                      // Show status display for non-pending status
+                      <div className="w-full py-3 px-4 bg-gray-50 border border-gray-200 rounded-lg">
+                        <div className="text-center">
+                          <p className="text-sm text-gray-600 mb-1">Current Status</p>
+                          <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium capitalize ${getStatusStyles(bugReport.status)}`}>
+                            {bugReport.status.replace('-', ' ')}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </>
                 ) : (
                   // Tester Actions
