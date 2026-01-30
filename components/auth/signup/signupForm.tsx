@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import ThemeButton from "@/components/ui/button";
 import { register, RegisterPayload } from "@/lib/api/auth/register";
 import { showToast } from "@/lib/utils/toast";
+import { uploadToCloudinary } from "@/lib/utils/cloudinary";
 import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
@@ -72,6 +73,24 @@ export default function SignupForm({ role }: SignupFormProps) {
     const loadingToast = showToast.loading('Creating your account...');
 
     try {
+      let avatarUrl = '';
+      
+      // Upload avatar to Cloudinary if provided
+      if (avatar) {
+        showToast.dismiss(loadingToast);
+        const uploadingToast = showToast.loading('Uploading avatar...');
+        try {
+          avatarUrl = await uploadToCloudinary(avatar, 'user-avatars');
+          showToast.dismiss(uploadingToast);
+          showToast.loading('Creating your account...');
+        } catch (uploadError) {
+          showToast.dismiss(uploadingToast);
+          showToast.error('Failed to upload avatar. Please try again.');
+          setLoading(false);
+          return;
+        }
+      }
+
       const payload: RegisterPayload = {
         fullname: data.fullname,
         email: data.email,
@@ -79,7 +98,7 @@ export default function SignupForm({ role }: SignupFormProps) {
         password: data.password,
         password2: data.password2,
         bio: data.bio,
-        avatar: avatar,
+        avatar_url: avatarUrl, // Send URL instead of file
         github_url: data.github_url || "",
         linkedin_url: data.linkedin_url || ""
       };

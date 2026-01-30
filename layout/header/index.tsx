@@ -19,6 +19,7 @@ interface HeaderProps {
 function Header({ authenticated, hasSidebar = false, toggleSidebar, isExpanded = false }: HeaderProps) {
   const currentRole = useAuthStore().user?.role
   const router = useRouter();
+  const user = useAuthStore().user;
 
   const handleNavigate = () => {
     if (currentRole === 'tester') {
@@ -80,24 +81,25 @@ function Header({ authenticated, hasSidebar = false, toggleSidebar, isExpanded =
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
             >
-              <Image
+              <div onClick={handleNavigate} className="cursor-pointer">
+                <IoMdNotifications size={24} className="text-[#A33C13]" />
+              </div>
+              <img
                 src="/trophy.png"
-                alt="User Avatar"
+                alt="Trophy"
                 width={40}
                 height={40}
                 className="rounded-full"
               />
               <span className="text-sm font-medium text-foreground">2,200 XP</span>
-              <Image
-                src="/userAvatar.png"
+              <img
+                src={user?.avatar_url || "/userAvatar.png"}
                 alt="User Avatar"
                 width={40}
                 height={40}
-                className="rounded-full"
+                className="rounded-full object-cover"
               />
-              <div onClick={handleNavigate} className="cursor-pointer">
-                <IoMdNotifications size={24} className="text-[#A33C13]" />
-              </div>
+
             </motion.div>
           ) : (
             <motion.div

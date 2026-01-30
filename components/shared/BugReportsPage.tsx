@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   FiCalendar,
   FiClock,
@@ -19,10 +19,11 @@ import {
   FiTrash2,
   FiArrowRight,
   FiUser,
-  FiPaperclip
+  FiPaperclip,
+  FiArrowLeft
   // FiBug removed as it does not exist in 'react-icons/fi'
 } from 'react-icons/fi'
-import { getBugReports, BugReportResponse, updateBugReport, deleteBugReport, AttachmentResponse } from '@/lib/api/tester/bugReport'
+import { getBugReports, getBugReportsByProject, BugReportResponse, updateBugReport, deleteBugReport, AttachmentResponse } from '@/lib/api/tester/bugReport'
 import toast from 'react-hot-toast'
 import Loader from '@/components/ui/loader'
 import ConfirmDeleteModal from '@/components/roles/common/modals/confirmDelete'
@@ -215,10 +216,16 @@ const BugReportCard: React.FC<BugReportCardProps> = ({ bugReport, onViewDetails,
 
 function BugReportsPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(true)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [bugReports, setBugReports] = useState<BugReportResponse[]>([])
 
+  // Get project filtering parameters
+  const projectId = searchParams.get('projectId')
+  const projectName = searchParams.get('projectName')
+  const fromParam = searchParams.get('from')
+  
   // Delete modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [bugToDelete, setBugToDelete] = useState<{ id: string, title: string } | null>(null)
@@ -231,8 +238,15 @@ function BugReportsPage() {
     const fetchBugReports = async () => {
       try {
         setIsLoading(true)
-        const response = await getBugReports()
-        setBugReports(response.results || [])
+        if (projectId) {
+          // Fetch bugs for specific project
+          const response = await getBugReportsByProject(projectId)
+          setBugReports(response)
+        } else {
+          // Fetch all user's bugs
+          const response = await getBugReports()
+          setBugReports(response.results || [])
+        }
       } catch (error) {
         console.error('Error fetching bug reports:', error)
         toast.error('Failed to load bug reports')
@@ -242,7 +256,7 @@ function BugReportsPage() {
     }
 
     fetchBugReports()
-  }, [])
+  }, [projectId])
   const userRole = useAuthStore().user?.role
   const handleViewBugDetails = (bugId: string) => {
     if (userRole == 'tester')
@@ -328,22 +342,43 @@ function BugReportsPage() {
         >
           {/* Header */}
           <div className="mb-8">
+            {/* Back Button - only show when viewing project-specific bugs */}
+            {projectId && fromParam && (
+              <button
+                onClick={() => {
+                  const userRole = useAuthStore().user?.role
+                  const backUrl = userRole === 'maintainer' 
+                    ? `/maintainer/project-details/${projectId}?from=${fromParam}`
+                    : `/tester/project-details/${projectId}?from=${fromParam}`
+                  router.push(backUrl)
+                }}
+                className='flex items-center gap-2 text-[#171717] mb-6 hover:text-[#A33C13] transition-all duration-300 group'
+              >
+                <div className='group-hover:-translate-x-1 transition-transform duration-300'>
+                  <FiArrowLeft size={20} />
+                </div>
+                <span className='font-medium'>Back to Project</span>
+              </button>
+            )}
+            
             <div className="flex justify-between items-start mb-6">
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold text-[#171717] mb-3">
-                  My Bug Reports
+                  {projectId ? `${projectName || 'Project'} Bug Reports` : 'My Bug Reports'}
                 </h1>
                 <p className="text-base text-gray-600">
-                  Track and manage all your reported bugs
+                  {projectId ? 'All bugs reported for this project' : 'Track and manage all your reported bugs'}
                 </p>
               </div>
-              <button
-                onClick={handleCreateNewBugReport}
-                className="bg-[#A33C13] hover:bg-[#8a2f0f] text-white px-6 py-3 rounded-lg transition-colors font-medium flex items-center gap-2 shadow-sm"
-              >
-                <FiPlus className="w-4 h-4" />
-                Report New Bug
-              </button>
+              {!projectId && (
+                <button
+                  onClick={handleCreateNewBugReport}
+                  className="bg-[#A33C13] hover:bg-[#8a2f0f] text-white px-6 py-3 rounded-lg transition-colors font-medium flex items-center gap-2 shadow-sm"
+                >
+                  <FiPlus className="w-4 h-4" />
+                  Report New Bug
+                </button>
+              )}
             </div>
 
             {/* Stats Bar */}
@@ -423,17 +458,24 @@ function BugReportsPage() {
               <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
                 <FiAlertCircle className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Bug Reports Yet</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                {projectId ? 'No Bug Reports for this Project' : 'No Bug Reports Yet'}
+              </h3>
               <p className="text-gray-600 mb-6 text-center max-w-md">
-                Start testing projects and report bugs to help improve software quality.
+                {projectId 
+                  ? 'No bugs have been reported for this project yet. Testers can start testing to identify issues.' 
+                  : 'Start testing projects and report bugs to help improve software quality.'
+                }
               </p>
-              <button
-                onClick={handleCreateNewBugReport}
-                className="bg-[#A33C13] hover:bg-[#8a2f0f] text-white px-8 py-3 rounded-lg transition-colors font-medium flex items-center gap-2"
-              >
-                <FiPlus className="w-4 h-4" />
-                Report Your First Bug
-              </button>
+              {!projectId && (
+                <button
+                  onClick={handleCreateNewBugReport}
+                  className="bg-[#A33C13] hover:bg-[#8a2f0f] text-white px-8 py-3 rounded-lg transition-colors font-medium flex items-center gap-2"
+                >
+                  <FiPlus className="w-4 h-4" />
+                  Report Your First Bug
+                </button>
+              )}
             </motion.div>
           )}
         </motion.div>

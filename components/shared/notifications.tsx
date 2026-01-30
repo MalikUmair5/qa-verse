@@ -134,7 +134,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
           {/* Target Object ID */}
           <div className="text-xs text-gray-500 mb-3 font-mono bg-gray-100 px-2 py-1 rounded truncate max-w-xs">
-            Report: {notification.target_object_id.substring(0, 8)}...
+            {userRole === 'maintainer' ? 'Project' : 'Report'}: {notification.target_object_id.substring(0, 8)}...
           </div>
 
           {/* Actions */}
@@ -160,16 +160,18 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => {
-                // Navigate based on user role
+                // Navigate based on user role and what the target_object_id represents
                 if (userRole === 'tester') {
+                  // For testers, target_object_id is bug id
                   router.push(`/tester/projects/bug/${notification.target_object_id}`)
                 } else if (userRole === 'maintainer') {
-                  router.push(`/maintainer/bugs/bug/${notification.target_object_id}`)
+                  // For maintainers, target_object_id is project id  
+                  router.push(`/maintainer/project-details/${notification.target_object_id}?from=notifications`)
                 }
               }}
               className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-100 transition-colors border border-gray-200"
             >
-              View Bug Report <FiArrowRight className="w-3 h-3" />
+              {userRole === 'maintainer' ? 'View Project' : 'View Bug Report'} <FiArrowRight className="w-3 h-3" />
             </motion.button>
           </div>
         </div>

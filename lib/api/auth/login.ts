@@ -7,7 +7,7 @@ export interface user {
     fullname: string;
     role: string;
     bio: string;
-    avatar: string;
+    avatar_url: string;
     github_url: string;
     linkedin_url: string;
 }

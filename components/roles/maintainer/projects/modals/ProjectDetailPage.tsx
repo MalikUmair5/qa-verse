@@ -5,6 +5,9 @@ import { FiArrowLeft } from 'react-icons/fi'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Loader from '@/components/ui/loader'
 import { ProjectInterface } from '@/lib/api/project-owner/projects'
+import { CgCalendarDates, CgDetailsMore } from 'react-icons/cg'
+import { HiCodeBracket } from "react-icons/hi2";
+
 
 interface ProjectDetailPageProps {
   projectId: string
@@ -87,7 +90,7 @@ function ProjectDetailPage({ projectId, projectData, onBack }: ProjectDetailPage
     linkedinUrl: projectData.maintainer.linkedin_url,
     instructions: projectData.instructions || [
       'Visit the project URL below',
-      'Test the application functionality', 
+      'Test the application functionality',
       'Report any bugs you find',
       'Provide detailed feedback'
     ],
@@ -191,7 +194,8 @@ function ProjectDetailPage({ projectId, projectData, onBack }: ProjectDetailPage
             {/* Instructions Section */}
             <div className='mb-6 sm:mb-8'>
               <h2 className='text-xl sm:text-2xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
-                <span>📋</span>
+                <span><CgDetailsMore />
+                </span>
                 Instructions
               </h2>
               <div className='bg-[#F5F5F5] rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow duration-300'>
@@ -227,7 +231,8 @@ function ProjectDetailPage({ projectId, projectData, onBack }: ProjectDetailPage
             {/* Tech Stack */}
             <div className='mb-6 sm:mb-8'>
               <h2 className='text-xl sm:text-2xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
-                <span>💻</span>
+                <span><HiCodeBracket />
+                </span>
                 Tech Stack
               </h2>
               <div className='flex flex-wrap gap-2 sm:gap-3'>
@@ -254,7 +259,7 @@ function ProjectDetailPage({ projectId, projectData, onBack }: ProjectDetailPage
               </p>
 
               <h3 className='text-lg sm:text-xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
-                <span>📊</span>
+                <span><CgCalendarDates /></span>
                 Project Stats
               </h3>
 

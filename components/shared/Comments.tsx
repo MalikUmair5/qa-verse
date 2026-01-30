@@ -42,22 +42,20 @@ const CommentItem: React.FC<CommentItemProps> = ({
   return (
     <div className={`${isReply ? 'ml-8 border-l-2 border-gray-200 pl-4' : ''}`}>
       <div
-        className={`rounded-lg p-4 hover:bg-gray-100 transition-colors ${
-          isCurrentUser 
-            ? 'bg-blue-50 border border-blue-200 ml-auto max-w-[80%]' 
+        className={`rounded-lg p-4 hover:bg-gray-100 transition-colors ${isCurrentUser
+            ? 'bg-blue-50 border border-blue-200 ml-auto max-w-[80%]'
             : 'bg-gray-50'
-        }`}
+          }`}
         onMouseEnter={() => setShowActions(true)}
         onMouseLeave={() => setShowActions(false)}
       >
         {/* Header */}
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-              isCurrentUser 
-                ? 'bg-blue-100 text-blue-600' 
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isCurrentUser
+                ? 'bg-blue-100 text-blue-600'
                 : 'bg-[#F5E6DD] text-[#A33C13]'
-            }`}>
+              }`}>
               <FiUser className="w-4 h-4" />
             </div>
             <div>
@@ -306,8 +304,7 @@ const Comments: React.FC<CommentsProps> = ({
               id="comment-input"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A33C13] focus:border-transparent resize-none"
-              rows={3}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A33C13] focus:border-transparent outline-none resize-none" rows={3}
               placeholder={replyTo ? "Write a reply..." : "Write a message..."}
               disabled={isSubmitting}
             />

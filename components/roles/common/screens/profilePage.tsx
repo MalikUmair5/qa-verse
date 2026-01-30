@@ -1,13 +1,14 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { FiEdit, FiLogOut, FiSave, FiX } from 'react-icons/fi'
+import { FiEdit, FiLogOut, FiSave, FiX, FiUpload } from 'react-icons/fi'
 import { MdLockOutline } from 'react-icons/md'
 import Loader from '@/components/ui/loader'
 import { useAuthStore } from '@/store/authStore'
 import { updateProfile, ProfileUpdateData } from '@/lib/api/auth/profile'
 import { showToast } from '@/lib/utils/toast'
+import { uploadToCloudinary } from '@/lib/utils/cloudinary'
 import logout from '@/lib/api/auth/logout'
 import { useRouter } from 'next/navigation'
 
@@ -37,6 +38,10 @@ function ProfilePage() {
   const [githubUrl, setGithubUrl] = useState(user?.github_url || '')
   const [linkedinUrl, setLinkedinUrl] = useState(user?.linkedin_url || '')
   const [isLoading, setIsLoading] = useState(true)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Simulate loading data
   useEffect(() => {
@@ -93,7 +98,69 @@ function ProfilePage() {
   }
 
   const handleChangeAvatar = () => {
-    console.log('Change Avatar')
+    fileInputRef.current?.click()
+  }
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        showToast.error('Please select an image file')
+        return
+      }
+      
+      // Validate file size (2MB max)
+      if (file.size > 2 * 1024 * 1024) {
+        showToast.error('Image size must be less than 2MB')
+        return
+      }
+      
+      setAvatarFile(file)
+      
+      // Create preview
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setAvatarPreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleUploadAvatar = async () => {
+    if (!avatarFile) return
+
+    setIsUploadingAvatar(true)
+    const uploadingToast = showToast.loading('Uploading avatar...')
+
+    try {
+      const avatarUrl = await uploadToCloudinary(avatarFile, 'user-avatars')
+      
+      // Update profile with new avatar URL
+      const updateData: ProfileUpdateData = {
+        avatar: avatarUrl
+      }
+      
+      await updateProfile(updateData)
+      
+      // Update auth store
+      updateUser({
+        avatar_url: avatarUrl
+      })
+      
+      showToast.dismiss(uploadingToast)
+      showToast.success('Avatar updated successfully!')
+      
+      // Clear preview
+      setAvatarFile(null)
+      setAvatarPreview(null)
+      
+    } catch (error) {
+      showToast.dismiss(uploadingToast)
+      showToast.error('Failed to upload avatar. Please try again.')
+    } finally {
+      setIsUploadingAvatar(false)
+    }
   }
 
   const handleChangePassword = () => {
@@ -134,16 +201,50 @@ function ProfilePage() {
           <div className='flex flex-col sm:flex-row items-start gap-4 sm:gap-6 mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-gray-300'>
             {/* Avatar */}
             <div className='relative mx-auto sm:mx-0'>
-              <div className='w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gray-300 overflow-hidden'>
-                <Image
-                  src='/next.svg'
-                  alt='Profile'
-                  width={96}
-                  height={96}
-                  className='w-full h-full object-cover'
-                />
+              <div className='w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gray-300 overflow-hidden border-2 border-[#A33C13]'>
+                {avatarPreview ? (
+                  <img
+                    src={avatarPreview}
+                    alt='Avatar preview'
+                    className='w-full h-full object-cover'
+                  />
+                ) : user?.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt='Profile Avatar'
+                    className='w-full h-full object-cover'
+                  />
+                ) : (
+                  <div className='w-full h-full flex items-center justify-center bg-[#A33C13] text-white text-2xl font-bold'>
+                    {user?.fullname?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                )}
               </div>
+              {avatarPreview && (
+                <div className='absolute -bottom-2 -right-2'>
+                  <button
+                    onClick={handleUploadAvatar}
+                    disabled={isUploadingAvatar}
+                    className='w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center hover:bg-green-700 transition-colors disabled:opacity-50'
+                    title='Upload Avatar'
+                  >
+                    {isUploadingAvatar ? (
+                      <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
+                    ) : (
+                      <FiUpload size={14} />
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type='file'
+              accept='image/*'
+              onChange={handleAvatarChange}
+              className='hidden'
+            />
 
             {/* User Info and Actions */}
             <div className='flex-1 w-full sm:w-auto text-center sm:text-left'>

@@ -2,11 +2,11 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { 
-  FiChevronLeft, 
-  FiCalendar, 
-  FiClock, 
-  FiUser, 
+import {
+  FiChevronLeft,
+  FiCalendar,
+  FiClock,
+  FiUser,
   FiAlertCircle,
   // Additional icons for the new design elements
   FiCheckCircle,
@@ -33,6 +33,11 @@ import AttachmentModal from './AttachmentModal'
 import { AttachmentList } from '@/components/ui/attachmentCard'
 import Comments from './Comments'
 import { useAuthStore } from '@/store/authStore'
+import { MdOutlineReplayCircleFilled } from 'react-icons/md'
+import { RiAttachmentFill } from 'react-icons/ri'
+import { ImFolder } from 'react-icons/im'
+import { IoChatboxEllipsesOutline } from "react-icons/io5";
+
 
 interface BugReportDetailPageProps {
   bugId: string
@@ -54,15 +59,15 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
   const [comments, setComments] = useState<CommentResponse[]>([])
   const [project, setProject] = useState<ProjectInterface | null>(null)
   const [projectLoading, setProjectLoading] = useState(false)
-  
+
   // Action states
   const [isApproving, setIsApproving] = useState(false)
   const [isRejecting, setIsRejecting] = useState(false)
-  const [isResolving, setIsResolving] = useState(false)  
-  
+  const [isResolving, setIsResolving] = useState(false)
+
   // Attachment modal state
   const [showAttachmentModal, setShowAttachmentModal] = useState(false)
-  
+
   // Delete confirmation state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -73,12 +78,12 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
         setIsLoading(true)
         const response = await getBugReportById(bugId)
         setBugReport(response)
-        
+
         // Set comments from the bug report response
         if (response.comments) {
           setComments(response.comments)
         }
-        
+
         // Fetch project details
         if (response.project) {
           setProjectLoading(true)
@@ -160,7 +165,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
     // Update the attachment in the bug report
     setBugReport(prev => prev ? {
       ...prev,
-      attachments: (prev.attachments || []).map(att => 
+      attachments: (prev.attachments || []).map(att =>
         att.id === updatedAttachment.id ? updatedAttachment : att
       )
     } : null)
@@ -168,7 +173,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
 
   const handleCommentsUpdated = async (updatedComments: CommentResponse[]) => {
     setComments(updatedComments)
-    
+
     // Also refetch the bug report to ensure we have the latest data
     try {
       const response = await getBugReportById(bugId)
@@ -201,7 +206,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
 
   const confirmDelete = async () => {
     if (!bugReport) return
-    
+
     try {
       setIsDeleting(true)
       await deleteBugReport(bugReport.id)
@@ -222,7 +227,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
 
   const handleApprove = async () => {
     if (!bugReport) return
-    
+
     try {
       setIsApproving(true)
       await approveBugReport(bugReport.id)
@@ -240,7 +245,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
 
   const handleReject = async () => {
     if (!bugReport) return
-    
+
     try {
       setIsRejecting(true)
       await rejectBugReport(bugReport.id)
@@ -258,7 +263,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
 
   const handleResolve = async () => {
     if (!bugReport) return
-    
+
     try {
       setIsResolving(true)
       await resolveBugReport(bugReport.id)
@@ -280,7 +285,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
 
   if (!bugReport) {
     return (
-      <motion.div 
+      <motion.div
         className="min-h-screen bg-[#FFFCFB] flex items-center justify-center"
         initial="initial" animate="animate" exit="exit" variants={contentAnimation}
       >
@@ -302,7 +307,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
   const severityStyle = getSeverityStyles(bugReport.severity)
 
   return (
-    <motion.div 
+    <motion.div
       className="min-h-screen bg-[#FFFCFB]"
       initial="initial" animate="animate" exit="exit" variants={contentAnimation}
     >
@@ -312,17 +317,17 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
           onClick={handleBack}
           className="flex items-center gap-2 text-[#171717] mb-6 hover:text-[#A33C13] transition-colors group"
         >
-           <div className='group-hover:-translate-x-1 transition-transform duration-300'>
+          <div className='group-hover:-translate-x-1 transition-transform duration-300'>
             <FiArrowLeft size={20} />
           </div>
           <span className="font-medium">Back to Bug Reports</span>
         </button>
 
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8'>
-          
+
           {/* --- Left Column: Main Content --- */}
           <div className='lg:col-span-2'>
-            
+
             {/* Header Section */}
             <div className='mb-6'>
               {/* Badges Row */}
@@ -352,21 +357,21 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
 
             {/* Description Card */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6 sm:mb-8">
-               <h2 className='text-xl font-bold text-[#171717] mb-4'>Description</h2>
-               <div className="prose prose-gray max-w-none text-[#171717] leading-relaxed whitespace-pre-wrap opacity-90">
-                  {bugReport.description}
-               </div>
+              <h2 className='text-xl font-bold text-[#171717] mb-4'>Description</h2>
+              <div className="prose prose-gray max-w-none text-[#171717] leading-relaxed whitespace-pre-wrap opacity-90">
+                {bugReport.description}
+              </div>
             </div>
 
             {/* Steps to Reproduce Card */}
             <div className='mb-6 sm:mb-8'>
               <h2 className='text-xl sm:text-2xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
-                <span>👣</span> Steps to Reproduce
+                <span><MdOutlineReplayCircleFilled /></span> Steps to Reproduce
               </h2>
               <div className='bg-[#F5F5F5] rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow duration-300 border border-gray-100'>
-                 <pre className="text-[#171717] leading-relaxed whitespace-pre-wrap font-sans">
-                   {bugReport.steps_to_reproduce}
-                 </pre>
+                <pre className="text-[#171717] leading-relaxed whitespace-pre-wrap font-sans">
+                  {bugReport.steps_to_reproduce}
+                </pre>
               </div>
             </div>
 
@@ -374,7 +379,8 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
             <div className="mb-6 sm:mb-8">
               <div className="flex items-center justify-between mb-4">
                 <h2 className='text-xl sm:text-2xl font-bold text-[#171717] flex items-center gap-2'>
-                  <span>🖼️</span> Evidence & Attachments
+                  <span><RiAttachmentFill />
+                  </span> Evidence & Attachments
                 </h2>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -425,7 +431,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
             {/* Comments Section */}
             <div className="mb-6 sm:mb-8">
               <h2 className='text-xl sm:text-2xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
-                <span>💬</span> Messages
+                <span><IoChatboxEllipsesOutline /></span> Messages
               </h2>
               <Comments
                 bugReportId={bugReport.id}
@@ -439,10 +445,10 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
           {/* --- Right Column: Sidebar Stats & Actions --- */}
           <div className='lg:col-span-1'>
             <div className='bg-white rounded-lg shadow-md border border-gray-100 p-4 sm:p-6 lg:sticky lg:top-24 hover:shadow-lg transition-shadow duration-300'>
-              
+
               {/* Reporter Info */}
               <h3 className='text-lg sm:text-xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
-                 Reported By
+                Reported By
               </h3>
               <div className="mb-6 flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-[#F5E6DD] flex items-center justify-center text-[#A33C13]">
@@ -460,7 +466,8 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
 
               {/* Project Info */}
               <h3 className='text-lg sm:text-xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
-                 <span>📁</span> Project Details
+                <span><ImFolder />
+                </span> Project Details
               </h3>
               {projectLoading ? (
                 <div className="mb-6 p-4 bg-gray-50 rounded-lg animate-pulse">
@@ -472,7 +479,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
                   <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
                     <h4 className="font-bold text-gray-900 text-lg mb-2">{project.title}</h4>
                     <p className="text-gray-700 text-sm mb-3 leading-relaxed">{project.description}</p>
-                    
+
                     <div className="grid grid-cols-1 gap-3">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Category</span>
@@ -480,31 +487,30 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
                           {project.category}
                         </span>
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</span>
-                        <span className={`px-2 py-1 rounded text-xs font-medium capitalize ${
-                          project.status === 'active' ? 'bg-green-100 text-green-700' :
+                        <span className={`px-2 py-1 rounded text-xs font-medium capitalize ${project.status === 'active' ? 'bg-green-100 text-green-700' :
                           project.status === 'completed' ? 'bg-gray-100 text-gray-700' :
-                          'bg-yellow-100 text-yellow-700'
-                        }`}>
+                            'bg-yellow-100 text-yellow-700'
+                          }`}>
                           {project.status}
                         </span>
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Tech Stack</span>
                         <span className="text-xs text-gray-700 font-mono bg-gray-100 px-2 py-1 rounded">
                           {project.technology_stack}
                         </span>
                       </div>
-                      
+
                       {project.testing_url && (
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Testing URL</span>
-                          <a 
-                            href={project.testing_url} 
-                            target="_blank" 
+                          <a
+                            href={project.testing_url}
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="text-xs text-blue-600 hover:text-blue-800 underline truncate max-w-[150px]"
                           >
@@ -512,7 +518,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
                           </a>
                         </div>
                       )}
-                      
+
                       <div className="pt-2 border-t border-blue-200">
                         <span className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">Maintainer</span>
                         <div className="flex items-center gap-2">
@@ -527,7 +533,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* <div className="p-3 bg-gray-50 rounded-lg">
                     <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Project ID</p>
                     <p className="text-[#171717] font-mono text-xs break-all">{bugReport.project}</p>
@@ -535,9 +541,9 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
                 </div>
               ) : (
                 <div className="mb-6 p-3 bg-gray-50 rounded-lg">
-                   <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Project ID</p>
-                   <p className="text-[#171717] font-mono text-sm break-all">{bugReport.project}</p>
-                   <p className="text-xs text-red-500 mt-1">Project details unavailable</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Project ID</p>
+                  <p className="text-[#171717] font-mono text-sm break-all">{bugReport.project}</p>
+                  <p className="text-xs text-red-500 mt-1">Project details unavailable</p>
                 </div>
               )}
 
@@ -555,7 +561,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
                     {new Date(bugReport.created_at).toLocaleDateString()}
                   </span>
                 </div>
-                
+
                 <div className='flex items-center justify-between p-3 bg-[#F5F5F5] rounded-lg'>
                   <div className="flex items-center gap-2 text-gray-600 text-sm">
                     <FiActivity /> <span>Updated</span>
@@ -656,18 +662,18 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
 
                 {/* Optional View Project Link */}
                 <motion.button
-                   whileHover={{ scale: 1.02 }}
-                   whileTap={{ scale: 0.98 }}
-                   onClick={() => {
-                     if (userRole === 'tester') {
-                       router.push('/tester/projects')
-                     } else if (userRole === 'maintainer') {
-                       router.push('/maintainer/bugs')
-                     }
-                   }}
-                   className='w-full py-2.5 border border-gray-200 text-gray-600 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-300 flex items-center justify-center gap-2'
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    if (userRole === 'tester') {
+                      router.push('/tester/projects')
+                    } else if (userRole === 'maintainer') {
+                      router.push('/maintainer/bugs')
+                    }
+                  }}
+                  className='w-full py-2.5 border border-gray-200 text-gray-600 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-300 flex items-center justify-center gap-2'
                 >
-                   <FiCornerDownRight /> {userRole === 'maintainer' ? 'Back to Bugs' : 'View Project'}
+                  <FiCornerDownRight /> {userRole === 'maintainer' ? 'Back to Bugs' : 'View Project'}
                 </motion.button>
               </div>
 
@@ -675,7 +681,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
           </div>
         </div>
       </div>
-      
+
       {/* Attachment Modal */}
       {bugReport && (
         <AttachmentModal
@@ -688,7 +694,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
           onAttachmentUpdated={handleAttachmentUpdated}
         />
       )}
-      
+
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -712,11 +718,11 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
                 </p>
               </div>
             </div>
-            
+
             <p className="text-gray-700 dark:text-gray-300 mb-6">
               Are you sure you want to delete "{bugReport?.title}"? This will permanently remove the bug report and all its attachments.
             </p>
-            
+
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}

@@ -6,7 +6,7 @@ export interface RegisterPayload {
     role: "tester" | "maintainer";
     password: string;
     password2: string;
-    avatar?: File | null;
+    avatar_url?: string; // Changed from File to string URL
     bio: string;
     github_url?: string;
     linkedin_url?: string;
@@ -22,7 +22,7 @@ export interface RegisterResponse {
 
 export async function register(payload: RegisterPayload): Promise<RegisterResponse> {
     try {
-        // Create FormData for file upload
+        // Create FormData for the request
         const formData = new FormData();
         
         // Append all text fields
@@ -41,9 +41,9 @@ export async function register(payload: RegisterPayload): Promise<RegisterRespon
             formData.append('linkedin_url', payload.linkedin_url);
         }
         
-        // Append avatar file if provided
-        if (payload.avatar) {
-            formData.append('avatar', payload.avatar);
+        // Append avatar URL if provided
+        if (payload.avatar_url) {
+            formData.append('avatar_url', payload.avatar_url);
         }
 
         const response = await axiosInstance.post<RegisterResponse>(

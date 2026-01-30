@@ -68,6 +68,24 @@ export async function getBugReports(): Promise<BugReportsListResponse> {
   }
 }
 
+export async function getBugReportsByProject(projectId: string): Promise<BugReportResponse[]> {
+  try {
+    const response = await axiosInstance.post<BugReportResponse[]>(
+      '/bugs/reports/project/',
+      { project_id: projectId }
+    )
+    
+    if (response.status !== 200) {
+      throw new Error('Failed to fetch bug reports for project')
+    }
+    
+    return response.data
+  } catch (error: unknown) {
+    console.error('Get bug reports by project error:', error)
+    throw error
+  }
+}
+
 export async function getBugReportById(id: string): Promise<BugReportResponse> {
   try {
     const response = await axiosInstance.get<BugReportResponse>(
