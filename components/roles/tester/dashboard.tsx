@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import Loader from '@/components/ui/loader'
 import { getProjects, ProjectInterface } from '@/lib/api/project-owner/projects'
 import { showToast } from '@/lib/utils/toast'
+import { MaintainerProjectCard } from '../maintainer/projects/modals/projectCard'
 
 function Dashboard() {
   const router = useRouter()
@@ -210,15 +211,10 @@ function Dashboard() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
               >
-                <ProjectCard
-                  title={project.title}
-                  description={project.description}
-                  category={project.category}
-                  difficulty="Medium" // Simplified - all projects have same difficulty
-                  participants={Math.floor(Math.random() * 20) + 5}
-                  bugs={Math.floor(Math.random() * 15)}
-                  image='/window.svg'
-                  onView={() => handleViewProject(project.id)}
+                <MaintainerProjectCard
+                  {...project}
+                  // Callbacks
+                  onViewDetails={() => handleViewProject(project.id)}
                 />
               </motion.div>
             ))
@@ -230,8 +226,8 @@ function Dashboard() {
                 </svg>
               </div>
               <h3 className='text-lg font-semibold text-gray-900 mb-2'>
-                {activeSearchQuery || selectedCategory !== 'all' 
-                  ? 'No Projects Found' 
+                {activeSearchQuery || selectedCategory !== 'all'
+                  ? 'No Projects Found'
                   : 'No Projects Available'
                 }
               </h3>
@@ -251,33 +247,31 @@ function Dashboard() {
             <button
               onClick={handlePreviousPage}
               disabled={!hasPrevious}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                hasPrevious
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${hasPrevious
                   ? 'bg-[#A33C13] text-white hover:bg-[#8a2f0f]'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
+                }`}
             >
               Previous
             </button>
-            
+
             <span className='px-4 py-2 text-[#171717] font-medium'>
               Page {currentPage} of {totalPages}
             </span>
-            
+
             <button
               onClick={handleNextPage}
               disabled={!hasNext}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                hasNext
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${hasNext
                   ? 'bg-[#A33C13] text-white hover:bg-[#8a2f0f]'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
+                }`}
             >
               Next
             </button>
           </div>
         )}
-        
+
         {/* Pagination Info */}
         {!isLoading && totalCount > 0 && (
           <div className='text-center mt-4 text-sm text-gray-600'>

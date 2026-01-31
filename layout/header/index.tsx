@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -8,6 +8,7 @@ import { HiMenuAlt2 } from 'react-icons/hi'
 import { IoMdNotifications } from 'react-icons/io'
 import { useAuthStore } from '@/store/authStore'
 import { useRouter } from 'next/navigation'
+import { getTotalXP } from '@/lib/api/gamification'
 
 interface HeaderProps {
   authenticated?: boolean
@@ -20,6 +21,36 @@ function Header({ authenticated, hasSidebar = false, toggleSidebar, isExpanded =
   const currentRole = useAuthStore().user?.role
   const router = useRouter();
   const user = useAuthStore().user;
+  const [totalXP, setTotalXP] = useState<number>(0)
+  const [isLoadingXP, setIsLoadingXP] = useState<boolean>(true)
+
+  // Function to fetch total XP
+  const fetchTotalXP = async () => {
+    if (!authenticated || !user) return
+
+    try {
+      const response = await getTotalXP()
+      setTotalXP(response.total_xp)
+      setIsLoadingXP(false)
+    } catch (error) {
+      console.error('Error fetching total XP:', error)
+      setIsLoadingXP(false)
+    }
+  }
+
+  // Fetch XP on component mount and set up interval
+  useEffect(() => {
+    if (authenticated && user) {
+      // Fetch immediately
+      fetchTotalXP()
+
+      // Set up interval to fetch every 10 seconds
+      const interval = setInterval(fetchTotalXP, 10000)
+
+      // Cleanup interval on unmount
+      return () => clearInterval(interval)
+    }
+  }, [authenticated, user])
 
   const handleNavigate = () => {
     if (currentRole === 'tester') {
@@ -84,14 +115,27 @@ function Header({ authenticated, hasSidebar = false, toggleSidebar, isExpanded =
               <div onClick={handleNavigate} className="cursor-pointer">
                 <IoMdNotifications size={24} className="text-[#A33C13]" />
               </div>
-              <img
-                src="/trophy.png"
-                alt="Trophy"
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-              <span className="text-sm font-medium text-foreground">2,200 XP</span>
+              {user?.role === 'tester' && (
+                <>
+                  <img
+                    src="/trophy.png"
+                    alt="Trophy"
+                    width={40}
+                    height={40}
+                    className="rounded-full"
+                  />
+                  <span className="text-sm font-medium text-foreground">
+                    {isLoadingXP ? (
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-[#A33C13] rounded-full animate-pulse"></div>
+                        <span>Loading...</span>
+                      </div>
+                    ) : (
+                      `${totalXP.toLocaleString()} XP`
+                    )}
+                  </span>
+                </>
+              )}
               <img
                 src={user?.avatar_url || "/userAvatar.png"}
                 alt="User Avatar"

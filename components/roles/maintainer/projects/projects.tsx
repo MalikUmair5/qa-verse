@@ -38,7 +38,8 @@ function ProjectsPage() {
             try {
                 setIsLoading(true)
                 const response = await getMaintainedProjects()
-                setProjects(response || [])
+                console.log('Maintained Projects:', response)
+                setProjects(response.results)
             } catch (error) {
                 console.error('Error fetching maintained projects:', error)
                 showToast.error('Failed to load projects')
@@ -123,7 +124,7 @@ function ProjectsPage() {
                     </div>
 
                     {/* Projects Grid */}
-                    {projects.length > 0 ? (
+                    {projects.length != 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                             {projects.map((project, index) => (
                                 <motion.div

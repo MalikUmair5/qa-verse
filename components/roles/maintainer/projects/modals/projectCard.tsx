@@ -1,7 +1,16 @@
-import { FiArrowRight, FiCalendar, FiCode, FiEdit2, FiLayers, FiTrash2, FiUser } from 'react-icons/fi'
+import {
+  FiArrowRight,
+  FiCalendar,
+  FiCode,
+  FiEdit2,
+  FiLayers,
+  FiTrash2,
+  FiUser,
+  FiUsers,
+  FiAlertCircle
+} from 'react-icons/fi'
 import { motion } from 'framer-motion'
 import { ProjectInterface } from '@/lib/api/project-owner/projects'
-
 
 interface ProjectCardProps {
   id: string
@@ -13,6 +22,8 @@ interface ProjectCardProps {
   status: string
   testing_url: string
   created_at: string
+  total_bugs_reported?: number
+  total_active_testers?: number
   maintainer: {
     id: string
     email: string
@@ -24,8 +35,8 @@ interface ProjectCardProps {
     linkedin_url: string | null
   }
   onViewDetails: (id: string) => void
-  onEdit: (project: ProjectInterface) => void
-  onDelete: (id: string, title: string) => void
+  onEdit?: (project: ProjectInterface) => void
+  onDelete?: (id: string, title: string) => void
 }
 
 export const MaintainerProjectCard: React.FC<ProjectCardProps> = ({
@@ -39,11 +50,12 @@ export const MaintainerProjectCard: React.FC<ProjectCardProps> = ({
   testing_url,
   created_at,
   maintainer,
+  total_active_testers = 0,
+  total_bugs_reported = 0,
   onViewDetails,
   onEdit,
   onDelete,
 }) => {
-  // Format date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', {
@@ -51,6 +63,7 @@ export const MaintainerProjectCard: React.FC<ProjectCardProps> = ({
       day: 'numeric'
     })
   }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
@@ -59,26 +72,22 @@ export const MaintainerProjectCard: React.FC<ProjectCardProps> = ({
     }
   };
 
-  const handleViewDetails = () => {
-    onViewDetails(id)
-  }
-
   const handleEdit = () => {
-    onEdit({
+    onEdit && onEdit({
       id,
       title,
-      description,      instructions: instructions || [],      technology_stack,
+      description,
+      instructions: instructions || [],
+      technology_stack,
       category,
       status,
       testing_url,
       created_at,
       maintainer,
-      updated_at: created_at // Use created_at as fallback for updated_at
+      updated_at: created_at,
+      total_active_testers,
+      total_bugs_reported,
     })
-  }
-
-  const handleDelete = () => {
-    onDelete(id, title)
   }
 
   return (
@@ -88,7 +97,7 @@ export const MaintainerProjectCard: React.FC<ProjectCardProps> = ({
       transition={{ duration: 0.3 }}
       className="group relative bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md hover:border-[#A33C13]/30 transition-all duration-300 flex flex-col h-full"
     >
-      {/* Top Right Action Icons */}
+      {/* Action Icons */}
       <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
           onClick={(e) => { e.stopPropagation(); handleEdit(); }}
@@ -98,7 +107,7 @@ export const MaintainerProjectCard: React.FC<ProjectCardProps> = ({
           <FiEdit2 size={16} />
         </button>
         <button
-          onClick={(e) => { e.stopPropagation(); handleDelete(); }}
+          onClick={(e) => { e.stopPropagation(); onDelete && onDelete(id, title); }}
           className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
           title="Delete"
         >
@@ -106,8 +115,8 @@ export const MaintainerProjectCard: React.FC<ProjectCardProps> = ({
         </button>
       </div>
 
-      {/* Header Section */}
-      <div className="mb-4 pr-16"> {/* pr-16 prevents title overlapping icons */}
+      {/* Header */}
+      <div className="mb-4 pr-16">
         <div className="flex items-center gap-3 mb-2">
           <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusColor(status)}`}>
             {status}
@@ -118,7 +127,19 @@ export const MaintainerProjectCard: React.FC<ProjectCardProps> = ({
         </h3>
       </div>
 
-      {/* Meta Data (Date & Maintainer) */}
+      {/* Stats Summary Section */}
+      <div className="flex gap-4 mb-4">
+        <div className="flex items-center gap-1.5 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
+          <FiUsers className="text-blue-600" size={14} />
+          <span className="text-xs font-bold text-blue-700">{total_active_testers} Testers</span>
+        </div>
+        <div className="flex items-center gap-1.5 bg-red-50 px-2.5 py-1 rounded-md border border-red-100">
+          <FiAlertCircle className="text-red-600" size={14} />
+          <span className="text-xs font-bold text-red-700">{total_bugs_reported} Bugs</span>
+        </div>
+      </div>
+
+      {/* Meta Data */}
       <div className="flex items-center gap-4 text-xs text-gray-500 mb-4 pb-4 border-b border-gray-100">
         <div className="flex items-center gap-1.5">
           <FiCalendar className="text-gray-400" />
@@ -131,7 +152,7 @@ export const MaintainerProjectCard: React.FC<ProjectCardProps> = ({
       </div>
 
       {/* Description */}
-      <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-3 flex-grow">
+      <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-2 flex-grow">
         {description}
       </p>
 
@@ -147,15 +168,13 @@ export const MaintainerProjectCard: React.FC<ProjectCardProps> = ({
         <div className="flex items-center gap-2 text-xs">
           <FiLayers className="text-[#A33C13]" />
           <span className="font-semibold text-gray-700">Type:</span>
-          <span className="text-gray-600 capitalize">
-            {category}
-          </span>
+          <span className="text-gray-600 capitalize">{category}</span>
         </div>
       </div>
 
       {/* Footer Action */}
       <button
-        onClick={handleViewDetails}
+        onClick={() => onViewDetails(id)}
         className="w-full mt-auto flex items-center justify-center gap-2 bg-gray-900 text-white py-2.5 px-4 rounded-lg hover:bg-[#A33C13] active:scale-95 transition-all duration-200 text-sm font-medium"
       >
         View Details

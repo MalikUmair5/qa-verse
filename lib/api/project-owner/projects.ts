@@ -33,6 +33,8 @@ export interface ProjectInterface {
   status: string;
   created_at: string;
   updated_at: string;
+  total_bugs_reported: number;
+  total_active_testers: number;
 }
 
 export interface ProjectResponse {
@@ -94,9 +96,9 @@ export async function getProjects(params?: {
   }
 }
 
-export async function getMaintainedProjects(): Promise<ProjectInterface[]> {
+export async function getMaintainedProjects(): Promise<ProjectResponse> {
   try {
-    const response = await axiosInstance.get<ProjectInterface[]>('/projects/maintained/');
+    const response = await axiosInstance.get<ProjectResponse>('/projects/maintained/');
     
     if (response.status !== 200) {
       throw new Error('Failed to fetch maintained projects');

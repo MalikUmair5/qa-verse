@@ -7,6 +7,7 @@ export interface LeaderboardEntry {
     role: string;
     total_xp: number;
     badges_count: number;
+    avatar_url: string | null;
 }
 
 export const getLeaderboard = async (): Promise<LeaderboardEntry[]> => {

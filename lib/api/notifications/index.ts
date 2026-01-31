@@ -5,6 +5,7 @@ export interface NotificationResponse {
   actor_email: string
   verb: string
   target_object_id: string
+  object_name: string
   is_read: boolean
   created_at: string
 }

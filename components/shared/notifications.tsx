@@ -134,7 +134,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
           {/* Target Object ID */}
           <div className="text-xs text-gray-500 mb-3 font-mono bg-gray-100 px-2 py-1 rounded truncate max-w-xs">
-            {userRole === 'maintainer' ? 'Project' : 'Report'}: {notification.target_object_id.substring(0, 8)}...
+            {userRole === 'maintainer' ? 'Project Name' : 'Report Name'}: {notification.object_name}
           </div>
 
           {/* Actions */}
@@ -214,42 +214,8 @@ function NotificationsPage() {
         unread: unreadCount
       })
     } catch (error) {
-      // For development - show mock data if API fails
-      const mockNotifications: NotificationResponse[] = [
-        {
-          id: 1,
-          actor_email: "john.doe@example.com",
-          verb: "commented on your bug report",
-          target_object_id: "080f5902-802f-40f8-b2a8-1654caa4a0d7",
-          is_read: false,
-          created_at: new Date(Date.now() - 10 * 60000).toISOString() // 10 minutes ago
-        },
-        {
-          id: 2,
-          actor_email: "jane.smith@example.com", 
-          verb: "updated status of your bug report to approved",
-          target_object_id: "3e87e5a9-4915-45c8-92e9-f3e7ad9e5741",
-          is_read: false,
-          created_at: new Date(Date.now() - 2 * 60 * 60000).toISOString() // 2 hours ago
-        },
-        {
-          id: 3,
-          actor_email: "admin@example.com",
-          verb: "updated status of your bug report to resolved", 
-          target_object_id: "abc123-def456-ghi789",
-          is_read: true,
-          created_at: new Date(Date.now() - 24 * 60 * 60000).toISOString() // 1 day ago
-        }
-      ]
-      
-      setNotifications(mockNotifications)
-      const unreadCount = mockNotifications.filter(n => !n.is_read).length
-      setNotificationStats({
-        total: mockNotifications.length,
-        unread: unreadCount
-      })
-      
-      showToast.error('Using mock data - API connection failed')
+      // For development - show mock data if API fails 
+      showToast.error('Failed to load notifications')
       console.error('Error fetching notifications:', error)
     } finally {
       setIsLoading(false)
