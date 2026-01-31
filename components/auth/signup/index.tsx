@@ -8,6 +8,7 @@ import { aclonica } from '@/app/layout'
 
 function SignUpPage() {
   const [tab, setTab] = useState<'tester' | 'owner'>('tester')
+  const [isOTPVerificationActive, setIsOTPVerificationActive] = useState(false)
   console.log("I am clicked", tab)
 
   return (
@@ -82,22 +83,30 @@ function SignUpPage() {
             className="flex flex-row w-full bg-white/10 backdrop-blur-sm rounded-md overflow-hidden mb-6"
           >
             <button
-              onClick={() => setTab("tester")}
+              onClick={() => !isOTPVerificationActive && setTab("tester")}
               type="button"
-              className={`w-1/2 py-3 font-medium transition ${tab === "tester"
-                ? "bg-[#A33C13] text-white"
-                : "text-white/70 hover:text-white"
-                }`}
+              disabled={isOTPVerificationActive}
+              className={`w-1/2 py-3 font-medium transition ${
+                isOTPVerificationActive 
+                  ? "text-white/30 cursor-not-allowed" 
+                  : tab === "tester"
+                  ? "bg-[#A33C13] text-white"
+                  : "text-white/70 hover:text-white"
+              }`}
             >
               I&apos;m Tester
             </button>
             <button
-              onClick={() => setTab("owner")}
+              onClick={() => !isOTPVerificationActive && setTab("owner")}
               type="button"
-              className={`w-1/2 py-3 font-medium transition ${tab === "owner"
-                ? "bg-[#A33C13] text-white"
-                : "text-white/70 hover:text-white"
-                }`}
+              disabled={isOTPVerificationActive}
+              className={`w-1/2 py-3 font-medium transition ${
+                isOTPVerificationActive 
+                  ? "text-white/30 cursor-not-allowed" 
+                  : tab === "owner"
+                  ? "bg-[#A33C13] text-white"
+                  : "text-white/70 hover:text-white"
+              }`}
             >
               I&apos;m Product Owner
             </button>
@@ -113,6 +122,7 @@ function SignUpPage() {
             {tab === "tester" && (
               <SignupForm
                 role="tester"
+                onOTPVerificationChange={setIsOTPVerificationActive}
                 onSubmit={(data) => console.log("Tester Signup:", data)}
               />
             )}
@@ -120,6 +130,7 @@ function SignUpPage() {
             {tab === "owner" && (
               <SignupForm
                 role="developer"
+                onOTPVerificationChange={setIsOTPVerificationActive}
                 onSubmit={(data) => console.log("Owner Signup:", data)}
               />
             )}
@@ -132,12 +143,11 @@ function SignUpPage() {
             </div>
 
             {/* Footer */}
-            <p className="text-center text-white/70">
-              Already a user?{" "}
-              <Link href="/signin" className="text-amber-300 hover:text-amber-200 hover:underline">
-                Login here
-              </Link>
-            </p>
+            <Link href="/signin" className="cursor-pointer">
+              <button className="w-full text-center text-white/70 hover:text-white transition-colors">
+                Already a user? Login here
+              </button>
+            </Link>
           </motion.div>
         </motion.div>
       </div>

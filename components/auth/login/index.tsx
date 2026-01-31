@@ -11,9 +11,11 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, LoginFormData } from '@/lib/schemas/auth'
+import { FiEye, FiEyeOff } from 'react-icons/fi'
 
 function LoginPage() {
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const {
@@ -171,18 +173,31 @@ function LoginPage() {
                 {errors.email.message}
               </motion.p>
             )}
-            <input
-              {...registerField("password")}
-              type="password"
-              placeholder="Password"
-              className={`mt-4 p-2 mb-4 w-full bg-transparent border-b-2 outline-none transition-colors ${
-                errors.password 
-                  ? 'border-red-500 focus:border-red-400' 
-                  : dirtyFields.password && !errors.password
-                  ? 'border-green-500 focus:border-green-400'
-                  : 'border-white/30 focus:border-amber-500'
-              }`}
-            />
+            <div className="relative mt-4">
+              <input
+                {...registerField("password")}
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                className={`p-2 mb-4 w-full pr-12 bg-transparent border-b-2 outline-none transition-colors ${
+                  errors.password 
+                    ? 'border-red-500 focus:border-red-400' 
+                    : dirtyFields.password && !errors.password
+                    ? 'border-green-500 focus:border-green-400'
+                    : 'border-white/30 focus:border-amber-500'
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/10 rounded transition-colors"
+              >
+                {showPassword ? (
+                  <FiEyeOff size={18} className="text-white/70" />
+                ) : (
+                  <FiEye size={18} className="text-white/70" />
+                )}
+              </button>
+            </div>
             {errors.password && (
               <motion.p 
                 initial={{ opacity: 0, y: -10 }}
@@ -216,9 +231,9 @@ function LoginPage() {
             </Link>
 
             <div className="mt-4 text-center text-sm text-white/60">
-              <a href="#" className="hover:underline">
+              <Link href="/reset-password" className="hover:underline">
                 Trouble signing in? Reset password
-              </a>
+              </Link>
             </div>
 
           </motion.div>

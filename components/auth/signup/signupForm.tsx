@@ -9,16 +9,23 @@ import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { signupSchema, SignupFormData } from "@/lib/schemas/auth";
+import { FiEye, FiEyeOff } from "react-icons/fi";
+import OTPVerification from "./OTPVerification";
 
 interface SignupFormProps {
   role: "tester" | "developer";
+  onOTPVerificationChange?: (isActive: boolean) => void;
   onSubmit?: (formData: Record<string, string>) => void;
 }
 
-export default function SignupForm({ role }: SignupFormProps) {
+export default function SignupForm({ role, onOTPVerificationChange }: SignupFormProps) {
   const [loading, setLoading] = useState(false);
   const [avatar, setAvatar] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [showOTPVerification, setShowOTPVerification] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword2, setShowPassword2] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -108,15 +115,14 @@ export default function SignupForm({ role }: SignupFormProps) {
       showToast.dismiss(loadingToast);
       showToast.success(response.message);
 
-      // Reset form
-      reset();
-      setAvatar(null);
-      setAvatarPreview(null);
+      // Store email for OTP verification
+      setUserEmail(data.email);
       
-      // Since registration doesn't return tokens, redirect to signin
-      setTimeout(() => {
-        router.push('/signin');
-      }, 2000);
+      // Notify parent component that OTP verification is active
+      onOTPVerificationChange?.(true);
+      
+      // Show OTP verification step
+      setShowOTPVerification(true);
       
     } catch (error: unknown) {
       showToast.dismiss(loadingToast);
@@ -147,6 +153,40 @@ export default function SignupForm({ role }: SignupFormProps) {
       setLoading(false);
     }
   };
+
+  const handleVerificationSuccess = () => {
+    // Notify parent that OTP verification is no longer active
+    onOTPVerificationChange?.(false);
+    
+    // Reset form completely
+    reset();
+    setAvatar(null);
+    setAvatarPreview(null);
+    setShowOTPVerification(false);
+    setUserEmail("");
+    
+    // Redirect to signin page
+    router.push('/signin');
+  };
+
+  const handleBackToSignup = () => {
+    // Notify parent that OTP verification is no longer active
+    onOTPVerificationChange?.(false);
+    
+    setShowOTPVerification(false);
+    setUserEmail("");
+  };
+
+  // Show OTP verification if needed
+  if (showOTPVerification) {
+    return (
+      <OTPVerification
+        email={userEmail}
+        onVerificationSuccess={handleVerificationSuccess}
+        onBackToSignup={handleBackToSignup}
+      />
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -230,12 +270,12 @@ export default function SignupForm({ role }: SignupFormProps) {
       </div>
 
       {/* Password */}
-      <div>
+      <div className="relative">
         <input
           {...registerField("password")}
-          type="password"
+          type={showPassword ? "text" : "password"}
           placeholder="Password"
-          className={`w-full p-3 bg-transparent border-b-2 outline-none transition-colors ${
+          className={`w-full p-3 pr-12 bg-transparent border-b-2 outline-none transition-colors ${
             errors.password 
               ? 'border-red-500 focus:border-red-400' 
               : dirtyFields.password && !errors.password
@@ -243,6 +283,17 @@ export default function SignupForm({ role }: SignupFormProps) {
               : 'border-white/30 focus:border-[#A33C13]'
           }`}
         />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/10 rounded transition-colors"
+        >
+          {showPassword ? (
+            <FiEyeOff size={18} className="text-white/70" />
+          ) : (
+            <FiEye size={18} className="text-white/70" />
+          )}
+        </button>
         {errors.password && (
           <motion.p 
             initial={{ opacity: 0, y: -10 }}
@@ -255,12 +306,12 @@ export default function SignupForm({ role }: SignupFormProps) {
       </div>
 
       {/* Confirm Password */}
-      <div>
+      <div className="relative">
         <input
           {...registerField("password2")}
-          type="password"
+          type={showPassword2 ? "text" : "password"}
           placeholder="Confirm Password"
-          className={`w-full p-3 bg-transparent border-b-2 outline-none transition-colors ${
+          className={`w-full p-3 pr-12 bg-transparent border-b-2 outline-none transition-colors ${
             errors.password2 
               ? 'border-red-500 focus:border-red-400' 
               : dirtyFields.password2 && !errors.password2
@@ -268,6 +319,17 @@ export default function SignupForm({ role }: SignupFormProps) {
               : 'border-white/30 focus:border-[#A33C13]'
           }`}
         />
+        <button
+          type="button"
+          onClick={() => setShowPassword2(!showPassword2)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/10 rounded transition-colors"
+        >
+          {showPassword2 ? (
+            <FiEyeOff size={18} className="text-white/70" />
+          ) : (
+            <FiEye size={18} className="text-white/70" />
+          )}
+        </button>
         {errors.password2 && (
           <motion.p 
             initial={{ opacity: 0, y: -10 }}

@@ -48,6 +48,58 @@ export const signupSchema = z.object({
   path: ["password2"],
 });
 
+// OTP verification schema
+export const otpSchema = z.object({
+  email: z.string()
+    .email("Please enter a valid email address")
+    .toLowerCase(),
+  
+  otp: z.string()
+    .length(6, "OTP must be exactly 6 digits")
+    .regex(/^\d{6}$/, "OTP must contain only numbers"),
+});
+
+// Password reset request schema
+export const passwordResetRequestSchema = z.object({
+  email: z.string()
+    .email("Please enter a valid email address")
+    .toLowerCase(),
+});
+
+// Password reset confirm schema
+export const passwordResetConfirmSchema = z.object({
+  email: z.string()
+    .email("Please enter a valid email address")
+    .toLowerCase(),
+  
+  otp: z.string()
+    .length(6, "OTP must be exactly 6 digits")
+    .regex(/^\d{6}$/, "OTP must contain only numbers"),
+  
+  new_password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 
+      "Password must contain at least one lowercase letter, one uppercase letter, and one number"),
+});
+
+// Change password schema
+export const changePasswordSchema = z.object({
+  old_password: z.string()
+    .min(1, "Current password is required"),
+  
+  new_password: z.string()
+    .min(8, "New password must be at least 8 characters")
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 
+      "New password must contain at least one lowercase letter, one uppercase letter, and one number"),
+}).refine((data) => data.old_password !== data.new_password, {
+  message: "New password must be different from current password",
+  path: ["new_password"],
+});
+
 // Type exports
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type SignupFormData = z.infer<typeof signupSchema>;
+export type OTPFormData = z.infer<typeof otpSchema>;
+export type PasswordResetRequestFormData = z.infer<typeof passwordResetRequestSchema>;
+export type PasswordResetConfirmFormData = z.infer<typeof passwordResetConfirmSchema>;
+export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;

@@ -11,6 +11,7 @@ import { showToast } from '@/lib/utils/toast'
 import { uploadToCloudinary } from '@/lib/utils/cloudinary'
 import logout from '@/lib/api/auth/logout'
 import { useRouter } from 'next/navigation'
+import ChangePasswordModal from '../modals/ChangePasswordModal'
 
 function ProfilePage() {
   const { user, updateUser } = useAuthStore()
@@ -37,6 +38,7 @@ function ProfilePage() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -132,7 +134,7 @@ function ProfilePage() {
   }
 
   const handleChangePassword = () => {
-    console.log('Change Password')
+    setShowChangePasswordModal(true)
   }
 
   if (isLoading) return <Loader />
@@ -313,6 +315,12 @@ function ProfilePage() {
           </div>
         </motion.div>
       </div>
+      
+      {/* Change Password Modal */}
+      <ChangePasswordModal 
+        isOpen={showChangePasswordModal}
+        onClose={() => setShowChangePasswordModal(false)}
+      />
     </div>
   )
 }
