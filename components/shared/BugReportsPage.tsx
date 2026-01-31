@@ -20,10 +20,12 @@ import {
   FiArrowRight,
   FiUser,
   FiPaperclip,
-  FiArrowLeft
+  FiArrowLeft,
+  FiSearch
   // FiBug removed as it does not exist in 'react-icons/fi'
 } from 'react-icons/fi'
 import { getBugReports, getBugReportsByProject, BugReportResponse, updateBugReport, deleteBugReport, AttachmentResponse } from '@/lib/api/tester/bugReport'
+import { getProjects, ProjectInterface } from '@/lib/api/project-owner/projects'
 import toast from 'react-hot-toast'
 import Loader from '@/components/ui/loader'
 import ConfirmDeleteModal from '@/components/roles/common/modals/confirmDelete'
@@ -221,6 +223,17 @@ function BugReportsPage() {
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [bugReports, setBugReports] = useState<BugReportResponse[]>([])
 
+  // Pagination and filtering states
+  const [searchQuery, setSearchQuery] = useState('')
+  const [activeSearchQuery, setActiveSearchQuery] = useState('')
+  const [selectedProject, setSelectedProject] = useState('all')
+  const [selectedOrdering, setSelectedOrdering] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const [hasNext, setHasNext] = useState(false)
+  const [hasPrevious, setHasPrevious] = useState(false)
+  const [projects, setProjects] = useState<ProjectInterface[]>([])
+
   // Get project filtering parameters
   const projectId = searchParams.get('projectId')
   const projectName = searchParams.get('projectName')
@@ -234,18 +247,45 @@ function BugReportsPage() {
   const [showAttachmentModal, setShowAttachmentModal] = useState(false)
   const [selectedBugForAttachment, setSelectedBugForAttachment] = useState<string | null>(null)
 
+  // Fetch projects for filtering (only when not viewing project-specific bugs)
+  useEffect(() => {
+    const fetchProjects = async () => {
+      if (!projectId) { // Only fetch projects if not viewing project-specific bugs
+        try {
+          const response = await getProjects()
+          setProjects(response.results || [])
+        } catch (error) {
+          console.error('Error fetching projects:', error)
+        }
+      }
+    }
+
+    fetchProjects()
+  }, [projectId])
+
   useEffect(() => {
     const fetchBugReports = async () => {
       try {
         setIsLoading(true)
         if (projectId) {
-          // Fetch bugs for specific project
+          // Fetch bugs for specific project (no pagination for project-specific)
           const response = await getBugReportsByProject(projectId)
           setBugReports(response)
+          setTotalCount(response.length)
+          setHasNext(false)
+          setHasPrevious(false)
         } else {
-          // Fetch all user's bugs
-          const response = await getBugReports()
+          // Fetch all user's bugs with pagination
+          const response = await getBugReports({
+            page: currentPage,
+            search: activeSearchQuery.trim() || undefined,
+            project: selectedProject !== 'all' ? selectedProject : undefined,
+            ordering: selectedOrdering || undefined
+          })
           setBugReports(response.results || [])
+          setTotalCount(response.count)
+          setHasNext(response.next !== null)
+          setHasPrevious(response.previous !== null)
         }
       } catch (error) {
         console.error('Error fetching bug reports:', error)
@@ -256,8 +296,42 @@ function BugReportsPage() {
     }
 
     fetchBugReports()
-  }, [projectId])
+  }, [projectId, currentPage, activeSearchQuery, selectedProject, selectedOrdering])
   const userRole = useAuthStore().user?.role
+  
+  const handleSearch = () => {
+    setActiveSearchQuery(searchQuery)
+    setCurrentPage(1) // Reset to first page when searching
+  }
+
+  const handleClearFilters = () => {
+    setSearchQuery('')
+    setActiveSearchQuery('')
+    setSelectedProject('all')
+    setSelectedOrdering('')
+    setCurrentPage(1)
+  }
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
+
+  const handleNextPage = () => {
+    if (hasNext) {
+      setCurrentPage(prev => prev + 1)
+    }
+  }
+
+  const handlePreviousPage = () => {
+    if (hasPrevious) {
+      setCurrentPage(prev => prev - 1)
+    }
+  }
+
+  const totalPages = Math.ceil(totalCount / 20) // Assuming 20 items per page
+
   const handleViewBugDetails = (bugId: string) => {
     if (userRole == 'tester')
       router.push(`/tester/projects/bug/${bugId}`)
@@ -381,6 +455,96 @@ function BugReportsPage() {
               )}
             </div>
 
+            {/* Search and Filters - Only show when not viewing project-specific bugs */}
+            {!projectId && (
+              <div className='space-y-4 mb-8'>
+                <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+                  {/* Search Bar */}
+                  <div className='flex gap-2'>
+                    <div className='relative flex-1'>
+                      <FiSearch className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg' />
+                      <input
+                        type='text'
+                        placeholder='Search bug reports...'
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        className='w-full pl-10 pr-4 py-2.5 border-2 border-[#A33C13] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A33C13] focus:border-transparent text-sm'
+                      />
+                    </div>
+                    <button
+                      onClick={handleSearch}
+                      className='bg-[#A33C13] hover:bg-[#8a2f0f] text-white px-4 py-2.5 rounded-lg transition-colors font-medium text-sm whitespace-nowrap'
+                    >
+                      Search
+                    </button>
+                  </div>
+
+                  {/* Project Filter */}
+                  <div>
+                    <select
+                      value={selectedProject}
+                      onChange={(e) => setSelectedProject(e.target.value)}
+                      className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A33C13] text-sm bg-white cursor-pointer hover:border-[#A33C13] transition-colors'
+                    >
+                      <option value='all'>All Projects</option>
+                      {projects.map(project => (
+                        <option key={project.id} value={project.id}>
+                          {project.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Ordering */}
+                  <div>
+                    <select
+                      value={selectedOrdering}
+                      onChange={(e) => setSelectedOrdering(e.target.value)}
+                      className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#A33C13] text-sm bg-white cursor-pointer hover:border-[#A33C13] transition-colors'
+                    >
+                      <option value=''>Default Order</option>
+                      <option value='created_at'>Oldest First</option>
+                      <option value='-created_at'>Newest First</option>
+                      <option value='severity'>Severity (Low to High)</option>
+                      <option value='-severity'>Severity (High to Low)</option>
+                      <option value='status'>Status</option>
+                      <option value='title'>Title (A-Z)</option>
+                      <option value='-title'>Title (Z-A)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Clear Filters Button */}
+                {(activeSearchQuery || selectedProject !== 'all' || selectedOrdering) && (
+                  <div className='flex justify-end'>
+                    <button
+                      onClick={handleClearFilters}
+                      className='bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors font-medium text-sm flex items-center gap-2'
+                    >
+                      <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+                      </svg>
+                      Clear Filters
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Results Count Info - Only show when not viewing project-specific bugs */}
+            {!projectId && !isLoading && (
+              <div className='mb-4 flex items-center justify-between text-sm text-gray-600'>
+                <p>
+                  Showing {bugReports.length} of {totalCount} bug reports
+                  {activeSearchQuery && <span> matching "{activeSearchQuery}"</span>}
+                </p>
+                <p>
+                  Page {currentPage} of {totalPages}
+                </p>
+              </div>
+            )}
+
             {/* Stats Bar */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <motion.div
@@ -477,6 +641,46 @@ function BugReportsPage() {
                 </button>
               )}
             </motion.div>
+          )}
+
+          {/* Pagination Controls - Only show when not viewing project-specific bugs */}
+          {!projectId && !isLoading && totalCount > 0 && (
+            <div className='flex items-center justify-center mt-8 space-x-4'>
+              <button
+                onClick={handlePreviousPage}
+                disabled={!hasPrevious}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  hasPrevious
+                    ? 'bg-[#A33C13] text-white hover:bg-[#8a2f0f]'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                Previous
+              </button>
+              
+              <span className='px-4 py-2 text-[#171717] font-medium'>
+                Page {currentPage} of {totalPages}
+              </span>
+              
+              <button
+                onClick={handleNextPage}
+                disabled={!hasNext}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  hasNext
+                    ? 'bg-[#A33C13] text-white hover:bg-[#8a2f0f]'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                Next
+              </button>
+            </div>
+          )}
+          
+          {/* Pagination Info - Only show when not viewing project-specific bugs */}
+          {!projectId && !isLoading && totalCount > 0 && (
+            <div className='text-center mt-4 text-sm text-gray-600'>
+              Total: {totalCount} bug reports
+            </div>
           )}
         </motion.div>
       </div>

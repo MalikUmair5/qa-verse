@@ -51,11 +51,33 @@ export async function createBugReport(payload: BugReportPayload): Promise<BugRep
   }
 }
 
-export async function getBugReports(): Promise<BugReportsListResponse> {
+export async function getBugReports(params?: {
+  page?: number;
+  search?: string;
+  project?: string;
+  ordering?: string;
+}): Promise<BugReportsListResponse> {
   try {
-    const response = await axiosInstance.get<BugReportsListResponse>(
-      '/bugs/reports/'
-    )
+    const queryParams = new URLSearchParams();
+    
+    if (params?.page) {
+      queryParams.append('page', params.page.toString());
+    }
+    
+    if (params?.search) {
+      queryParams.append('search', params.search);
+    }
+    
+    if (params?.project) {
+      queryParams.append('project', params.project);
+    }
+    
+    if (params?.ordering) {
+      queryParams.append('ordering', params.ordering);
+    }
+    
+    const url = `/bugs/reports/${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await axiosInstance.get<BugReportsListResponse>(url);
     
     if (response.status !== 200) {
       throw new Error('Failed to fetch bug reports')

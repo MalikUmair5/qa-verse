@@ -42,7 +42,7 @@ axiosInstance.interceptors.response.use(
                 // B. Call your Backend Refresh Endpoint
                 // We use standard 'axios' here to avoid using our interceptors
                 const response = await axios.post(
-                    'https://fyp-production-dc9d.up.railway.app/api/v1/auth/refresh-token/',
+                    'http://127.0.0.1:8000/api/v1/auth/refresh-token/',
                     {
                         refresh_token: currentRefreshToken
                     }

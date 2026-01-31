@@ -138,7 +138,7 @@ function ProfilePage() {
       
       // Update profile with new avatar URL
       const updateData: ProfileUpdateData = {
-        avatar: avatarUrl
+        avatar_url: avatarUrl
       }
       
       await updateProfile(updateData)

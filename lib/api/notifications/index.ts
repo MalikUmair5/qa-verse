@@ -17,10 +17,19 @@ export interface NotificationsListResponse {
 }
 
 // Get all notifications for the current user
-export const getNotifications = async (): Promise<NotificationsListResponse> => {
+export const getNotifications = async (params?: {
+  page?: number;
+}): Promise<NotificationsListResponse> => {
   try {
-    const response = await axiosInstance.get('/notifications/')
-    return response.data
+    const queryParams = new URLSearchParams();
+    
+    if (params?.page) {
+      queryParams.append('page', params.page.toString());
+    }
+    
+    const url = `/notifications/${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await axiosInstance.get(url);
+    return response.data;
   } catch (error) {
     console.error('Error fetching notifications:', error)
     throw error

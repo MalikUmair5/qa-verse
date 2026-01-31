@@ -190,12 +190,22 @@ function NotificationsPage() {
   const [markingIds, setMarkingIds] = useState<Set<number>>(new Set())
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all')
   const [forceUpdate, setForceUpdate] = useState(0)
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const [hasNext, setHasNext] = useState(false)
+  const [hasPrevious, setHasPrevious] = useState(false)
+
   // Fetch notifications
-  const fetchNotifications = async (showLoader = true) => {
+  const fetchNotifications = async (showLoader = true, page = 1) => {
     try {
       if (showLoader) setIsLoading(true)
-      const response = await getNotifications()
+      const response = await getNotifications({ page })
       setNotifications(response.results)
+      setTotalCount(response.count)
+      setHasNext(response.next !== null)
+      setHasPrevious(response.previous !== null)
       
       // Calculate stats
       const unreadCount = response.results.filter(n => !n.is_read).length
@@ -248,20 +258,35 @@ function NotificationsPage() {
 
   // Initial load
   useEffect(() => {
-    fetchNotifications()
+    fetchNotifications(true, currentPage)
     
-    // Set up auto-refresh every 30 seconds
+    // Set up auto-refresh every 30 seconds (only for current page)
     const interval = setInterval(() => {
-      fetchNotifications(false)
+      fetchNotifications(false, currentPage)
     }, 30000)
     
     return () => clearInterval(interval)
-  }, [])
+  }, [currentPage])
+
+  // Pagination handlers
+  const handleNextPage = () => {
+    if (hasNext) {
+      setCurrentPage(prev => prev + 1)
+    }
+  }
+
+  const handlePreviousPage = () => {
+    if (hasPrevious) {
+      setCurrentPage(prev => prev - 1)
+    }
+  }
+
+  const totalPages = Math.ceil(totalCount / 10) // Assuming 10 items per page
 
   // Refresh notifications
   const handleRefresh = async () => {
     setIsRefreshing(true)
-    await fetchNotifications(false)
+    await fetchNotifications(false, currentPage)
     setIsRefreshing(false)
     showToast.success('Notifications refreshed')
   }
@@ -445,6 +470,18 @@ function NotificationsPage() {
               </motion.button>
             )}
           </div>
+
+          {/* Pagination Info */}
+          {!isLoading && totalCount > 0 && (
+            <div className='mt-4 flex items-center justify-between text-sm text-gray-600'>
+              <p>
+                Showing {notifications.length} of {totalCount} notifications
+              </p>
+              <p>
+                Page {currentPage} of {totalPages}
+              </p>
+            </div>
+          )}
         </motion.div>
 
         {/* Notifications List */}
@@ -497,6 +534,46 @@ function NotificationsPage() {
                   />
                 ))}
               </AnimatePresence>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {!isLoading && totalCount > 0 && (
+            <div className='flex items-center justify-center mt-8 space-x-4'>
+              <button
+                onClick={handlePreviousPage}
+                disabled={!hasPrevious}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  hasPrevious
+                    ? 'bg-[#A33C13] text-white hover:bg-[#8a2f0f]'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                Previous
+              </button>
+              
+              <span className='px-4 py-2 text-[#171717] font-medium'>
+                Page {currentPage} of {totalPages}
+              </span>
+              
+              <button
+                onClick={handleNextPage}
+                disabled={!hasNext}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  hasNext
+                    ? 'bg-[#A33C13] text-white hover:bg-[#8a2f0f]'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                Next
+              </button>
+            </div>
+          )}
+          
+          {/* Total Notifications Info */}
+          {!isLoading && totalCount > 0 && (
+            <div className='text-center mt-4 text-sm text-gray-600'>
+              Total: {totalCount} notifications
             </div>
           )}
         </motion.div>

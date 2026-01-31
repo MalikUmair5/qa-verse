@@ -60,9 +60,28 @@ export async function createProject(payload: ProjectPayload): Promise<ProjectInt
   }
 }
 
-export async function getProjects(): Promise<ProjectResponse> {
+export async function getProjects(params?: {
+  page?: number;
+  search?: string;
+  ordering?: string;
+}): Promise<ProjectResponse> {
   try {
-    const response = await axiosInstance.get<ProjectResponse>('/projects/');
+    const queryParams = new URLSearchParams();
+    
+    if (params?.page) {
+      queryParams.append('page', params.page.toString());
+    }
+    
+    if (params?.search) {
+      queryParams.append('search', params.search);
+    }
+    
+    if (params?.ordering) {
+      queryParams.append('ordering', params.ordering);
+    }
+    
+    const url = `/projects/${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await axiosInstance.get<ProjectResponse>(url);
     
     if (response.status !== 200) {
       throw new Error('Failed to fetch projects');

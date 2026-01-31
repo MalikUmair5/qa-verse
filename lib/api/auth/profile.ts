@@ -5,7 +5,7 @@ export interface ProfileUpdateData {
     fullname?: string
     role?: 'tester' | 'maintainer'
     bio?: string
-    avatar?: string // Cloudinary URL
+    avatar_url?: string // Cloudinary URL
     github_url?: string
     linkedin_url?: string
 }
