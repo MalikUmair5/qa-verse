@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { IoBugSharp } from "react-icons/io5";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
@@ -110,7 +111,7 @@ export default function Home() {
                 delay: 0
               }}
             >
-              🐛
+              <IoBugSharp />
             </motion.div>
 
             {/* Code Scanning Line - Positioned away from text */}
@@ -444,7 +445,8 @@ export default function Home() {
                   }}
                   transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  🐛
+                  <IoBugSharp />
+
                 </motion.div>
 
                 <motion.div

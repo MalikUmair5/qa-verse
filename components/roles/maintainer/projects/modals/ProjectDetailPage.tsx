@@ -7,6 +7,8 @@ import Loader from '@/components/ui/loader'
 import { ProjectInterface } from '@/lib/api/project-owner/projects'
 import { CgCalendarDates, CgDetailsMore } from 'react-icons/cg'
 import { HiCodeBracket } from "react-icons/hi2";
+import { IoBugSharp } from 'react-icons/io5'
+import { FaUsers } from 'react-icons/fa'
 
 
 interface ProjectDetailPageProps {
@@ -266,7 +268,7 @@ function ProjectDetailPage({ projectId, projectData, onBack }: ProjectDetailPage
               <div className='space-y-3 sm:space-y-4'>
                 <div className='flex items-center justify-between p-3 bg-[#F5F5F5] rounded-lg hover:bg-[#F0E6DD] transition-colors duration-200'>
                   <div className='flex items-center gap-2'>
-                    <span className='text-lg sm:text-xl'>🐛</span>
+                    <span className='text-lg sm:text-xl'><IoBugSharp /></span>
                     <span className='text-[#171717] font-medium text-sm sm:text-base'>Bugs Reported</span>
                   </div>
                   <span className='font-bold text-[#171717]'>
@@ -276,7 +278,7 @@ function ProjectDetailPage({ projectId, projectData, onBack }: ProjectDetailPage
 
                 <div className='flex items-center justify-between p-3 bg-[#F5F5F5] rounded-lg hover:bg-[#F0E6DD] transition-colors duration-200'>
                   <div className='flex items-center gap-2'>
-                    <span className='text-lg sm:text-xl'>👥</span>
+                    <span className='text-lg sm:text-xl'><FaUsers /></span>
                     <span className='text-[#171717] font-medium text-sm sm:text-base'>Active Testers</span>
                   </div>
                   <span className='font-bold text-[#171717]'>

@@ -2,7 +2,7 @@
 import React, { useEffect, Suspense, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
-import { MdBugReport, MdLeaderboard, MdOutlineDashboard, MdOutlineFindReplace } from "react-icons/md";
+import { MdBugReport, MdDashboard, MdLeaderboard, MdOutlineDashboard, MdOutlineFindReplace } from "react-icons/md";
 import { ImProfile } from "react-icons/im";
 import { RiGitMergeLine, RiTrophyLine } from "react-icons/ri";
 import { CgProfile } from "react-icons/cg";
@@ -26,9 +26,14 @@ interface MenuItem {
 // 1. Define Role-Specific Menus
 const TESTER_MENU: MenuItem[] = [
   {
-    label: "Explore Projects",
-    icon: <MdOutlineFindReplace size={20} />,
+    label: "Dashboard",
+    icon: <MdDashboard size={20} />,
     path: '/tester/dashboard'
+  },
+  {
+    label: "Explore Projects",
+    icon: <RiTrophyLine size={20} />,
+    path: '/tester/explore-projects'
   },
   {
     label: "My Bug Reports",
@@ -156,20 +161,40 @@ function SidebarContent() {
   const isActivePath = (itemPath: string) => {
     if (pathname === itemPath) return true;
 
-    if (!pathname.startsWith('/tester/project-details/') &&
-      !pathname.startsWith('/tester/report-bug') &&
-      pathname.startsWith(itemPath + '/')) {
+    // Extract role from itemPath (tester/maintainer)
+    const roleMatch = itemPath.match(/^\/(tester|maintainer)\//);
+    const role = roleMatch ? roleMatch[1] : null;
+
+    if (!role) return false;
+
+    // Special detail/form pages that should use 'from' parameter for navigation context
+    const specialPages = [
+      `/${role}/project-details/`,
+      `/${role}/report-bug`,
+    ];
+
+    // Check if current pathname is a special page that uses 'from' parameter
+    const isInSpecialPage = specialPages.some(specialPage => 
+      pathname.startsWith(specialPage)
+    );
+
+    // Handle special pages using 'from' parameter
+    if (isInSpecialPage) {
+      // Check if this menu item matches the 'from' parameter
+      if (itemPath === `/${role}/projects` && (fromParam === 'projects' || fromParam === 'project-details')) return true;
+      if (itemPath === `/${role}/dashboard` && fromParam === 'dashboard') return true;
+      if (itemPath === `/${role}/explore-projects` && fromParam === 'explore-projects') return true;
+      if (itemPath === `/${role}/leader-board` && fromParam === 'leader-board') return true;
+      if (itemPath === `/${role}/notifications` && fromParam === 'notifications') return true;
+      if (itemPath === `/${role}/profile` && fromParam === 'profile') return true;
+      // Additional maintainer-specific paths
+      if (itemPath === `/${role}/bugs` && fromParam === 'bugs') return true;
+    }
+
+    // For non-special pages, check if pathname starts with itemPath + '/'
+    // This handles sub-paths like /maintainer/bugs/bug/id
+    if (!isInSpecialPage && pathname.startsWith(itemPath + '/')) {
       return true;
-    }
-
-    if (pathname.startsWith('/tester/project-details/')) {
-      if (itemPath === '/tester/projects' && fromParam === 'projects') return true;
-      if (itemPath === '/tester/dashboard' && fromParam === 'dashboard') return true;
-    }
-
-    if (pathname.startsWith('/tester/report-bug')) {
-      if (itemPath === '/tester/projects' && fromParam === 'projects') return true;
-      if (itemPath === '/tester/dashboard' && fromParam === 'dashboard') return true;
     }
 
     return false;

@@ -330,7 +330,7 @@ function BugReportsPage() {
     }
   }
 
-  const totalPages = Math.ceil(totalCount / 20) // Assuming 20 items per page
+  const totalPages = Math.ceil(totalCount / 10) // Assuming 20 items per page
 
   const handleViewBugDetails = (bugId: string) => {
     if (userRole == 'tester')
