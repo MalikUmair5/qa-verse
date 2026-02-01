@@ -59,7 +59,7 @@ function ExploreProjects() {
   })
 
   const handleViewProject = (projectId: string) => {
-    router.push(`/tester/project-details/${projectId}?from=dashboard`)
+    router.push(`/tester/project-details/${projectId}?from=explore-projects`)
   }
 
   const handleSearch = () => {

@@ -269,7 +269,7 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7, duration: 0.8 }}
               >
-                Project Pilot connects student testers with new software projects. Help
+                QA-Verse connects student testers with new software projects. Help
                 Developers, build your skills and climb the leaderboard
               </motion.p>
 

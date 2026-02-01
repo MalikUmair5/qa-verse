@@ -2,12 +2,12 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { 
-  FiBell, 
-  FiCheck, 
-  FiCheckCircle, 
-  FiClock, 
-  FiMail, 
+import {
+  FiBell,
+  FiCheck,
+  FiCheckCircle,
+  FiClock,
+  FiMail,
   FiUser,
   FiX,
   FiRefreshCw,
@@ -19,10 +19,10 @@ import {
 import Loader from '@/components/ui/loader'
 import ThemeButton from '@/components/ui/button'
 import { useAuthStore } from '@/store/authStore'
-import { 
-  getNotifications, 
-  markNotificationAsRead, 
-  markAllNotificationsAsRead, 
+import {
+  getNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
   type NotificationResponse,
   type NotificationsListResponse
 } from '@/lib/api/notifications'
@@ -31,10 +31,10 @@ import { showToast } from '@/lib/utils/toast'
 // Animation variants
 const containerAnimation = {
   initial: { opacity: 0 },
-  animate: { 
+  animate: {
     opacity: 1,
-    transition: { 
-      staggerChildren: 0.1 
+    transition: {
+      staggerChildren: 0.1
     }
   }
 }
@@ -52,10 +52,10 @@ interface NotificationCardProps {
   isMarking: boolean
 }
 
-const NotificationCard: React.FC<NotificationCardProps> = ({ 
-  notification, 
-  onMarkAsRead, 
-  isMarking 
+const NotificationCard: React.FC<NotificationCardProps> = ({
+  notification,
+  onMarkAsRead,
+  isMarking
 }) => {
   const router = useRouter()
   const userRole = useAuthStore().user?.role
@@ -89,14 +89,30 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     return 'bg-gray-50 border-gray-200 text-gray-700'
   }
 
+  const handleRoute = () => {
+    // Navigate based on user role and what the target_object_id represents
+    if (userRole === 'tester') {
+      // For testers, target_object_id is bug id
+      router.push(`/tester/projects/bug/${notification.target_object_id}`)
+    } else if (userRole === 'maintainer') {
+      if (notification.verb.includes('commented')) {
+        // For maintainers, if it's a comment, go to bug detail
+        router.push(`/maintainer/bugs/bug/${notification.target_object_id}`)
+      }
+      else if (notification.verb.includes('reported')){
+        // For maintainers, if it's a new bug reported, go to bug detail
+        router.push(`/maintainer/project-details/${notification.target_object_id}`)
+      }
+    }
+  }
+
   return (
     <motion.div
       variants={itemAnimation}
-      className={`relative p-4 rounded-lg border transition-all duration-200 hover:shadow-md ${
-        notification.is_read 
-          ? 'bg-white border-gray-200' 
-          : 'bg-orange-50/50 border-orange-200 ring-1 ring-orange-100'
-      }`}
+      className={`relative p-4 rounded-lg border transition-all duration-200 hover:shadow-md ${notification.is_read
+        ? 'bg-white border-gray-200'
+        : 'bg-orange-50/50 border-orange-200 ring-1 ring-orange-100'
+        }`}
     >
       {/* Unread indicator */}
       {!notification.is_read && (
@@ -122,7 +138,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                 {notification.verb}
               </span>
             </div>
-            
+
             {/* Time */}
             <div className="flex items-center gap-2 flex-shrink-0">
               <span className="text-xs text-gray-500 flex items-center gap-1">
@@ -159,19 +175,10 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                // Navigate based on user role and what the target_object_id represents
-                if (userRole === 'tester') {
-                  // For testers, target_object_id is bug id
-                  router.push(`/tester/projects/bug/${notification.target_object_id}`)
-                } else if (userRole === 'maintainer') {
-                  // For maintainers, target_object_id is project id  
-                  router.push(`/maintainer/project-details/${notification.target_object_id}?from=notifications`)
-                }
-              }}
+              onClick={handleRoute}
               className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-100 transition-colors border border-gray-200"
             >
-              {userRole === 'maintainer' ? 'View Project' : 'View Bug Report'} <FiArrowRight className="w-3 h-3" />
+              View <FiArrowRight className="w-3 h-3" />
             </motion.button>
           </div>
         </div>
@@ -190,7 +197,7 @@ function NotificationsPage() {
   const [markingIds, setMarkingIds] = useState<Set<number>>(new Set())
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all')
   const [forceUpdate, setForceUpdate] = useState(0)
-  
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
@@ -206,7 +213,7 @@ function NotificationsPage() {
       setTotalCount(response.count)
       setHasNext(response.next !== null)
       setHasPrevious(response.previous !== null)
-      
+
       // Calculate stats
       const unreadCount = response.results.filter(n => !n.is_read).length
       setNotificationStats({
@@ -225,12 +232,12 @@ function NotificationsPage() {
   // Initial load
   useEffect(() => {
     fetchNotifications(true, currentPage)
-    
+
     // Set up auto-refresh every 30 seconds (only for current page)
     const interval = setInterval(() => {
       fetchNotifications(false, currentPage)
     }, 30000)
-    
+
     return () => clearInterval(interval)
   }, [currentPage])
 
@@ -262,12 +269,12 @@ function NotificationsPage() {
     setMarkingIds(prev => new Set(prev).add(id))
     try {
       await markNotificationAsRead(id)
-      setNotifications(prev => 
+      setNotifications(prev =>
         prev.map(n => n.id === id ? { ...n, is_read: true } : n)
       )
-      setNotificationStats(prev => ({ 
-        ...prev, 
-        unread: Math.max(0, prev.unread - 1) 
+      setNotificationStats(prev => ({
+        ...prev,
+        unread: Math.max(0, prev.unread - 1)
       }))
       showToast.success('Notification marked as read')
     } catch (error) {
@@ -402,11 +409,10 @@ function NotificationsPage() {
                     setFilter(filterOption)
                     setForceUpdate(prev => prev + 1)
                   }}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all capitalize ${
-                    filter === filterOption
-                      ? 'bg-[#A33C13] text-white shadow-sm'
-                      : 'text-gray-600 hover:text-[#A33C13] hover:bg-gray-50'
-                  }`}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all capitalize ${filter === filterOption
+                    ? 'bg-[#A33C13] text-white shadow-sm'
+                    : 'text-gray-600 hover:text-[#A33C13] hover:bg-gray-50'
+                    }`}
                 >
                   {filterOption}
                   {filterOption === 'unread' && notificationStats.unread > 0 && (
@@ -417,7 +423,7 @@ function NotificationsPage() {
                 </button>
               ))}
             </div>
-            
+
             {/* Mark All as Read Button */}
             {notificationStats.unread > 0 && (
               <motion.button
@@ -468,13 +474,13 @@ function NotificationsPage() {
                 <FiBell className="w-8 h-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-semibold text-[#171717] mb-2">
-                {filter === 'unread' ? 'No unread notifications' : 
-                 filter === 'read' ? 'No read notifications' : 'No notifications yet'}
+                {filter === 'unread' ? 'No unread notifications' :
+                  filter === 'read' ? 'No read notifications' : 'No notifications yet'}
               </h3>
               <p className="text-gray-600 mb-6">
                 {filter === 'unread' ? 'All caught up! Check back later for new updates.' :
-                 filter === 'read' ? 'No notifications have been read yet.' :
-                 'We\'ll notify you when there\'s activity on your bug reports.'}
+                  filter === 'read' ? 'No notifications have been read yet.' :
+                    'We\'ll notify you when there\'s activity on your bug reports.'}
               </p>
               {filter !== 'all' && (
                 <motion.button
@@ -509,33 +515,31 @@ function NotificationsPage() {
               <button
                 onClick={handlePreviousPage}
                 disabled={!hasPrevious}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  hasPrevious
-                    ? 'bg-[#A33C13] text-white hover:bg-[#8a2f0f]'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${hasPrevious
+                  ? 'bg-[#A33C13] text-white hover:bg-[#8a2f0f]'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
               >
                 Previous
               </button>
-              
+
               <span className='px-4 py-2 text-[#171717] font-medium'>
                 Page {currentPage} of {totalPages}
               </span>
-              
+
               <button
                 onClick={handleNextPage}
                 disabled={!hasNext}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  hasNext
-                    ? 'bg-[#A33C13] text-white hover:bg-[#8a2f0f]'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${hasNext
+                  ? 'bg-[#A33C13] text-white hover:bg-[#8a2f0f]'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
               >
                 Next
               </button>
             </div>
           )}
-          
+
           {/* Total Notifications Info */}
           {!isLoading && totalCount > 0 && (
             <div className='text-center mt-4 text-sm text-gray-600'>

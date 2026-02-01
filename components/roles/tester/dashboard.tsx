@@ -279,7 +279,7 @@ function Dashboard() {
           transition={{ delay: 0.6 }}
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
-          <div 
+          {/* <div 
             onClick={() => router.push('/tester/report-bug')}
             className="bg-gradient-to-r from-[#A33C13] to-red-600 rounded-lg p-6 cursor-pointer hover:from-red-600 hover:to-[#A33C13] transition-all duration-300 transform hover:scale-105"
           >
@@ -288,10 +288,10 @@ function Dashboard() {
               <h3 className="text-xl font-bold text-white">Report Bug</h3>
             </div>
             <p className="text-white/90">Found a new bug? Report it now!</p>
-          </div>
+          </div> */}
 
           <div 
-            onClick={() => router.push('/tester/projects')}
+            onClick={() => router.push('/tester/explore-projects')}
             className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 cursor-pointer hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105"
           >
             <div className="flex items-center mb-4">

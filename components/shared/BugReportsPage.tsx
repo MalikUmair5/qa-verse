@@ -54,6 +54,7 @@ interface BugReportCardProps {
 
 const BugReportCard: React.FC<BugReportCardProps> = ({ bugReport, onViewDetails, onEdit, onDelete, onAddAttachment }) => {
 
+  const user = useAuthStore().user
   // Elegant/Subtle Severity Styling
   const getSeverityStyles = (severity: string) => {
     switch (severity.toLowerCase()) {
@@ -126,29 +127,31 @@ const BugReportCard: React.FC<BugReportCardProps> = ({ bugReport, onViewDetails,
       className="group relative bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md hover:border-[#A33C13]/30 transition-all duration-300 flex flex-col h-full"
     >
       {/* Top Right Action Icons */}
-      <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <button
-          onClick={(e) => { e.stopPropagation(); handleAddAttachment(); }}
-          className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors"
-          title="Add Attachment"
-        >
-          <FiPaperclip size={16} />
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); handleEdit(); }}
-          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-          title="Edit"
-        >
-          <FiEdit2 size={16} />
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); handleDelete(); }}
-          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-          title="Delete"
-        >
-          <FiTrash2 size={16} />
-        </button>
-      </div>
+      {user?.role === 'tester' && (
+        <div className="absolute top-1 right-1 flex flex-col-reverse gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <button
+            onClick={(e) => { e.stopPropagation(); handleAddAttachment(); }}
+            className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors"
+            title="Add Attachment"
+          >
+            <FiPaperclip size={16} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); handleEdit(); }}
+            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+            title="Edit"
+          >
+            <FiEdit2 size={16} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); handleDelete(); }}
+            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+            title="Delete"
+          >
+            <FiTrash2 size={16} />
+          </button>
+        </div>
+      )}
 
       {/* Header Section */}
       <div className="mb-4 pr-16"> {/* pr-16 prevents title overlapping icons */}
@@ -218,6 +221,10 @@ const BugReportCard: React.FC<BugReportCardProps> = ({ bugReport, onViewDetails,
 
 function BugReportsPage() {
   const router = useRouter()
+  // const userRole = useAuthStore().user?.role
+  const userRole = useAuthStore().user?.role
+
+
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(true)
   const [deleteLoading, setDeleteLoading] = useState(false)
@@ -238,7 +245,7 @@ function BugReportsPage() {
   const projectId = searchParams.get('projectId')
   const projectName = searchParams.get('projectName')
   const fromParam = searchParams.get('from')
-  
+
   // Delete modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [bugToDelete, setBugToDelete] = useState<{ id: string, title: string } | null>(null)
@@ -246,6 +253,7 @@ function BugReportsPage() {
   // Attachment modal state
   const [showAttachmentModal, setShowAttachmentModal] = useState(false)
   const [selectedBugForAttachment, setSelectedBugForAttachment] = useState<string | null>(null)
+
 
   // Fetch projects for filtering (only when not viewing project-specific bugs)
   useEffect(() => {
@@ -297,8 +305,7 @@ function BugReportsPage() {
 
     fetchBugReports()
   }, [projectId, currentPage, activeSearchQuery, selectedProject, selectedOrdering])
-  const userRole = useAuthStore().user?.role
-  
+
   const handleSearch = () => {
     setActiveSearchQuery(searchQuery)
     setCurrentPage(1) // Reset to first page when searching
@@ -328,6 +335,13 @@ function BugReportsPage() {
     if (hasPrevious) {
       setCurrentPage(prev => prev - 1)
     }
+  }
+
+  const handleBack = () => {
+    const backUrl = userRole === 'maintainer'
+      ? `/maintainer/project-details/${projectId}?from=${fromParam}`
+      : `/tester/project-details/${projectId}?from=${fromParam}`
+    router.push(backUrl)
   }
 
   const totalPages = Math.ceil(totalCount / 10) // Assuming 20 items per page
@@ -419,13 +433,7 @@ function BugReportsPage() {
             {/* Back Button - only show when viewing project-specific bugs */}
             {projectId && fromParam && (
               <button
-                onClick={() => {
-                  const userRole = useAuthStore().user?.role
-                  const backUrl = userRole === 'maintainer' 
-                    ? `/maintainer/project-details/${projectId}?from=${fromParam}`
-                    : `/tester/project-details/${projectId}?from=${fromParam}`
-                  router.push(backUrl)
-                }}
+                onClick={handleBack}
                 className='flex items-center gap-2 text-[#171717] mb-6 hover:text-[#A33C13] transition-all duration-300 group'
               >
                 <div className='group-hover:-translate-x-1 transition-transform duration-300'>
@@ -434,7 +442,7 @@ function BugReportsPage() {
                 <span className='font-medium'>Back to Project</span>
               </button>
             )}
-            
+
             <div className="flex justify-between items-start mb-6">
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold text-[#171717] mb-3">
@@ -444,7 +452,7 @@ function BugReportsPage() {
                   {projectId ? 'All bugs reported for this project' : 'Track and manage all your reported bugs'}
                 </p>
               </div>
-              {!projectId && (
+              {/* {!projectId && (
                 <button
                   onClick={handleCreateNewBugReport}
                   className="bg-[#A33C13] hover:bg-[#8a2f0f] text-white px-6 py-3 rounded-lg transition-colors font-medium flex items-center gap-2 shadow-sm"
@@ -452,7 +460,7 @@ function BugReportsPage() {
                   <FiPlus className="w-4 h-4" />
                   Report New Bug
                 </button>
-              )}
+              )} */}
             </div>
 
             {/* Search and Filters - Only show when not viewing project-specific bugs */}
@@ -481,7 +489,7 @@ function BugReportsPage() {
                   </div>
 
                   {/* Project Filter */}
-                  <div>
+                  {/* <div>
                     <select
                       value={selectedProject}
                       onChange={(e) => setSelectedProject(e.target.value)}
@@ -494,7 +502,7 @@ function BugReportsPage() {
                         </option>
                       ))}
                     </select>
-                  </div>
+                  </div> */}
 
                   {/* Ordering */}
                   <div>
@@ -567,7 +575,7 @@ function BugReportsPage() {
                 </div>
                 <div className="text-sm text-gray-500 font-medium">Pending</div>
               </motion.div>
-              <motion.div
+              {/* <motion.div
                 className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -577,7 +585,7 @@ function BugReportsPage() {
                   {bugReports.filter(bug => bug.status === 'in-progress').length}
                 </div>
                 <div className="text-sm text-gray-500 font-medium">In Progress</div>
-              </motion.div>
+              </motion.div> */}
               <motion.div
                 className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm"
                 initial={{ opacity: 0, y: 20 }}
@@ -585,9 +593,20 @@ function BugReportsPage() {
                 transition={{ duration: 0.5, delay: 0.4 }}
               >
                 <div className="text-2xl font-bold text-green-600">
-                  {bugReports.filter(bug => bug.status === 'resolved').length}
+                  {bugReports.filter(bug => bug.status === 'approved').length}
                 </div>
-                <div className="text-sm text-gray-500 font-medium">Resolved</div>
+                <div className="text-sm text-gray-500 font-medium">Approved</div>
+              </motion.div>
+              <motion.div
+                className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
+                <div className="text-2xl font-bold text-red-600">
+                  {bugReports.filter(bug => bug.status === 'rejected').length}
+                </div>
+                <div className="text-sm text-gray-500 font-medium">Rejected</div>
               </motion.div>
             </div>
           </div>
@@ -626,8 +645,8 @@ function BugReportsPage() {
                 {projectId ? 'No Bug Reports for this Project' : 'No Bug Reports Yet'}
               </h3>
               <p className="text-gray-600 mb-6 text-center max-w-md">
-                {projectId 
-                  ? 'No bugs have been reported for this project yet. Testers can start testing to identify issues.' 
+                {projectId
+                  ? 'No bugs have been reported for this project yet. Testers can start testing to identify issues.'
                   : 'Start testing projects and report bugs to help improve software quality.'
                 }
               </p>
@@ -649,33 +668,31 @@ function BugReportsPage() {
               <button
                 onClick={handlePreviousPage}
                 disabled={!hasPrevious}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  hasPrevious
-                    ? 'bg-[#A33C13] text-white hover:bg-[#8a2f0f]'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${hasPrevious
+                  ? 'bg-[#A33C13] text-white hover:bg-[#8a2f0f]'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
               >
                 Previous
               </button>
-              
+
               <span className='px-4 py-2 text-[#171717] font-medium'>
                 Page {currentPage} of {totalPages}
               </span>
-              
+
               <button
                 onClick={handleNextPage}
                 disabled={!hasNext}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  hasNext
-                    ? 'bg-[#A33C13] text-white hover:bg-[#8a2f0f]'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${hasNext
+                  ? 'bg-[#A33C13] text-white hover:bg-[#8a2f0f]'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
               >
                 Next
               </button>
             </div>
           )}
-          
+
           {/* Pagination Info - Only show when not viewing project-specific bugs */}
           {!projectId && !isLoading && totalCount > 0 && (
             <div className='text-center mt-4 text-sm text-gray-600'>

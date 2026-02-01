@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fi'
 import { motion } from 'framer-motion'
 import { ProjectInterface } from '@/lib/api/project-owner/projects'
+import { useAuthStore } from '@/store/authStore'
 
 interface ProjectCardProps {
   id: string
@@ -64,6 +65,8 @@ export const MaintainerProjectCard: React.FC<ProjectCardProps> = ({
     })
   }
 
+  const user = useAuthStore().user
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
@@ -98,22 +101,24 @@ export const MaintainerProjectCard: React.FC<ProjectCardProps> = ({
       className="group relative bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md hover:border-[#A33C13]/30 transition-all duration-300 flex flex-col h-full"
     >
       {/* Action Icons */}
-      <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <button
-          onClick={(e) => { e.stopPropagation(); handleEdit(); }}
-          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-          title="Edit"
-        >
-          <FiEdit2 size={16} />
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); onDelete && onDelete(id, title); }}
-          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-          title="Delete"
-        >
-          <FiTrash2 size={16} />
-        </button>
-      </div>
+      {user?.role === 'maintainer' && (
+        <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <button
+            onClick={(e) => { e.stopPropagation(); handleEdit(); }}
+            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+            title="Edit"
+          >
+            <FiEdit2 size={16} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete && onDelete(id, title); }}
+            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+            title="Delete"
+          >
+            <FiTrash2 size={16} />
+          </button>
+        </div>
+      )}
 
       {/* Header */}
       <div className="mb-4 pr-16">

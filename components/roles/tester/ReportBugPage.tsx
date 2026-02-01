@@ -258,7 +258,7 @@ function ReportBugPage() {
             </div>
 
             {/* Attach Media */}
-            <div>
+            {/* <div>
               <label className='block text-[#A33C13] font-medium mb-2'>
                 Attach Media (Optional)
               </label>
@@ -284,7 +284,7 @@ function ReportBugPage() {
                   </span>
                 </label>
               </div>
-            </div>
+            </div> */}
 
             {/* Submit Button */}
             <div className='pt-4'>

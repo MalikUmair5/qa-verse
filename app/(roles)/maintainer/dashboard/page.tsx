@@ -22,8 +22,10 @@ import {
 } from 'chart.js'
 import { Bar, Doughnut, Line } from 'react-chartjs-2'
 import { IoBugSharp } from 'react-icons/io5';
-import { FaCheckCircle, FaClipboardList, FaPlus } from 'react-icons/fa';
+import { FaCheckCircle, FaClipboardList, FaPlus, FaUserShield } from 'react-icons/fa';
 import { HiTrophy } from 'react-icons/hi2';
+import { GrGroup } from "react-icons/gr";
+
 
 ChartJS.register(
   CategoryScale,
@@ -84,7 +86,7 @@ function MaintainerDashboard() {
   }
 
   // Calculate approval rate
-  const approvalRate = analytics.total_bugs > 0 
+  const approvalRate = analytics.total_bugs > 0
     ? Math.round((analytics.approved_bugs / analytics.total_bugs) * 100)
     : 0
 
@@ -181,32 +183,32 @@ function MaintainerDashboard() {
   }
 
   const stats = [
-    { 
-      title: 'Active Projects', 
-      value: analytics.total_active_projects.toString(), 
-      icon: '🚀', 
+    {
+      title: 'Active Projects',
+      value: analytics.total_active_projects.toString(),
+      icon: <FaUserShield />,
       color: 'from-blue-500 to-cyan-500',
       description: 'Currently running projects'
     },
-    { 
-      title: 'Total Testers', 
-      value: analytics.total_testers.toString(), 
-      icon: '👥', 
+    {
+      title: 'Total Testers',
+      value: analytics.total_testers.toString(),
+      icon: <GrGroup />,
       color: 'from-green-500 to-emerald-500',
       description: 'Active testing community'
     },
-    { 
-      title: 'Bug Reports', 
-      value: analytics.total_bugs.toString(), 
+    {
+      title: 'Bug Reports',
+      value: analytics.total_bugs.toString(),
       icon: <IoBugSharp />
-, 
+      ,
       color: 'from-red-500 to-pink-500',
       description: 'Total bug reports received'
     },
-    { 
-      title: 'Approved Bugs', 
-      value: analytics.approved_bugs.toString(), 
-      icon: <FaCheckCircle />, 
+    {
+      title: 'Approved Bugs',
+      value: analytics.approved_bugs.toString(),
+      icon: <FaCheckCircle />,
       color: 'from-purple-500 to-violet-500',
       description: 'Validated bug reports'
     }
@@ -302,45 +304,45 @@ function MaintainerDashboard() {
           transition={{ delay: 0.6 }}
           className="grid grid-cols-1 md:grid-cols-4 gap-6"
         >
-          <div 
+          <div
             onClick={() => router.push('/maintainer/projects/create')}
             className="bg-gradient-to-r from-[#A33C13] to-red-600 rounded-lg p-6 cursor-pointer hover:from-red-600 hover:to-[#A33C13] transition-all duration-300 transform hover:scale-105"
           >
             <div className="flex items-center mb-4">
-              <span className="text-3xl mr-3"><FaPlus /></span>
+              <span className="text-3xl mr-3"><FaPlus className='text-white' /></span>
               <h3 className="text-xl font-bold text-white">New Project</h3>
             </div>
             <p className="text-white/90">Create a new testing project</p>
           </div>
 
-          <div 
+          <div
             onClick={() => router.push('/maintainer/projects')}
             className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 cursor-pointer hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105"
           >
             <div className="flex items-center mb-4">
-              <span className="text-3xl mr-3"><FaClipboardList /></span>
+              <span className="text-3xl mr-3"><FaClipboardList className='text-white' /></span>
               <h3 className="text-xl font-bold text-white">All Projects</h3>
             </div>
             <p className="text-white/90">View and manage projects</p>
           </div>
 
-          <div 
+          <div
             onClick={() => router.push('/maintainer/bugs')}
             className="bg-gradient-to-r from-green-600 to-teal-600 rounded-lg p-6 cursor-pointer hover:from-teal-600 hover:to-green-600 transition-all duration-300 transform hover:scale-105"
           >
             <div className="flex items-center mb-4">
-              <span className="text-3xl mr-3"><IoBugSharp /></span>
+              <span className="text-3xl mr-3"><IoBugSharp className='text-white' /></span>
               <h3 className="text-xl font-bold text-white">Bug Reports</h3>
             </div>
             <p className="text-white/90">Review bug submissions</p>
           </div>
 
-          <div 
+          <div
             onClick={() => router.push('/maintainer/leader-board')}
             className="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg p-6 cursor-pointer hover:from-orange-500 hover:to-yellow-500 transition-all duration-300 transform hover:scale-105"
           >
             <div className="flex items-center mb-4">
-              <span className="text-3xl mr-3"><HiTrophy /></span>
+              <span className="text-3xl mr-3"><HiTrophy className='text-white' /></span>
               <h3 className="text-xl font-bold text-white">Leaderboard</h3>
             </div>
             <p className="text-white/90">Top performing testers</p>

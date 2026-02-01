@@ -549,7 +549,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
 
               {/* Timestamps */}
               <h3 className='text-lg sm:text-xl font-bold text-[#171717] mb-4 flex items-center gap-2'>
-                <span>⏳</span> Timeline
+                <span></span> Timeline
               </h3>
 
               <div className='space-y-3 mb-6'>
@@ -595,7 +595,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
                           {isApproving ? 'Approving...' : 'Approve Bug'}
                         </motion.button>
 
-                        <motion.button
+                        {/* <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           onClick={handleResolve}
@@ -608,7 +608,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
                             <FiCheck />
                           )}
                           {isResolving ? 'Resolving...' : 'Resolve Bug'}
-                        </motion.button>
+                        </motion.button> */}
 
                         <motion.button
                           whileHover={{ scale: 1.02 }}
@@ -673,7 +673,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
                   }}
                   className='w-full py-2.5 border border-gray-200 text-gray-600 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-300 flex items-center justify-center gap-2'
                 >
-                  <FiCornerDownRight /> {userRole === 'maintainer' ? 'Back to Bugs' : 'View Project'}
+                  <FiCornerDownRight /> View All Bug Reports
                 </motion.button>
               </div>
 
@@ -711,7 +711,7 @@ function BugReportDetailPage({ bugId }: BugReportDetailPageProps) {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                  Delete Bug Report
+                  Delete
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   This action cannot be undone

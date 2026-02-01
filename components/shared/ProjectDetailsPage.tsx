@@ -96,7 +96,7 @@ function ProjectDetailsPage({ projectId }: ProjectDetailsPageProps) {
     if (userRole === 'maintainer') {
       return fromParam === 'projects' ? '/maintainer/projects' : '/maintainer/dashboard'
     } else {
-      return fromParam === 'projects' ? '/tester/projects' : '/tester/dashboard'
+      return fromParam === 'explore-projects' ? '/tester/explore-projects' : '/tester/dashboard'
     }
   }
 

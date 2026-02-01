@@ -46,7 +46,7 @@ const TESTER_MENU: MenuItem[] = [
     path: '/tester/leader-board'
   },
   {
-    label: "notifications",
+    label: "Notifications",
     icon: <IoMdNotifications size={20} />,
     path: '/tester/notifications'
   },
@@ -84,14 +84,9 @@ const MAINTAINER_MENU: MenuItem[] = [
     path: '/maintainer/profile'
   },
   {
-    label: "notifications",
+    label: "Notifications",
     icon: <IoMdNotifications size={20} />,
     path: '/maintainer/notifications'
-  },
-  {
-    label: "Settings",
-    icon: <IoMdSettings size={20} />,
-    path: '/maintainer/settings'
   }
 ]
 function SidebarContent() {
