@@ -647,10 +647,12 @@ function BugReportsPage() {
               <p className="text-gray-600 mb-6 text-center max-w-md">
                 {projectId
                   ? 'No bugs have been reported for this project yet. Testers can start testing to identify issues.'
-                  : 'Start testing projects and report bugs to help improve software quality.'
+                  : userRole === 'tester' 
+                    ? 'Start testing projects and report bugs to help improve software quality.'
+                    : 'No bug reports have been submitted yet. Testers will report bugs as they find issues in your projects.'
                 }
               </p>
-              {!projectId && (
+              {!projectId && userRole === 'tester' && (
                 <button
                   onClick={handleCreateNewBugReport}
                   className="bg-[#A33C13] hover:bg-[#8a2f0f] text-white px-8 py-3 rounded-lg transition-colors font-medium flex items-center gap-2"

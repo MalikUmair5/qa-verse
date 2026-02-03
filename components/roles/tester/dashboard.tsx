@@ -205,7 +205,6 @@ function Dashboard() {
             Tester Dashboard
           </h1>
           <p className="text-[#171717]/70">Welcome back, {user?.fullname}!</p>
-          <p className="text-sm text-[#171717]/60 mt-2">Email: {analytics.email}</p>
         </motion.div>
 
         {/* Stats Grid */}

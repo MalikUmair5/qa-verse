@@ -15,6 +15,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
 import { useLoading } from '@/app/(roles)/layout'; // or wherever LoadingContext is defined
 import { TbReportSearch } from "react-icons/tb";
+import { HiShieldCheck } from "react-icons/hi2";
 
 
 interface MenuItem {
@@ -72,6 +73,11 @@ const MAINTAINER_MENU: MenuItem[] = [
     label: "Bug Reports",
     icon: <MdBugReport size={20} />,
     path: '/maintainer/bugs'
+  },
+  {
+    label: "Compliance Audit",
+    icon: <HiShieldCheck size={20} />,
+    path: '/maintainer/compliance-audit'
   },
   {
     label: "Leaderboard",
@@ -184,6 +190,7 @@ function SidebarContent() {
       if (itemPath === `/${role}/profile` && fromParam === 'profile') return true;
       // Additional maintainer-specific paths
       if (itemPath === `/${role}/bugs` && fromParam === 'bugs') return true;
+      if (itemPath === `/${role}/compliance-audit` && fromParam === 'compliance-audit') return true;
     }
 
     // For non-special pages, check if pathname starts with itemPath + '/'
